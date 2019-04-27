@@ -1,4 +1,4 @@
-# IoT-Cube-Webpage
+IoT-Cube-Webpage
 ===================
 
 ### About

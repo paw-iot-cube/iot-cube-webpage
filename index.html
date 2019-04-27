@@ -6,19 +6,10 @@
     <html lang="en" manifest="uibuilder.appcache">
   -->
 <html lang="en">
-<!--
-    This is the default, template html for uibuilder.
-    It is only meant to demonstrate the use of JQuery to dynamically
-    update the ui based on incoming/outgoing messages from/to the
-    Node-RED server.
-
-    You will want to alter this to suite your own needs. To do so,
-    copy this file to <userDir>/uibuilder/<url>/src.
-  -->
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- See https://goo.gl/OOhYW5 -->
     <link rel="manifest" href="./manifest.json">
@@ -47,40 +38,143 @@
     <link rel="icon" href="./images/node-blue.ico">
 
     <!-- OPTIONAL: Normalize is used to make things the same across browsers. Index is for your styles -->
-    <link rel="stylesheet" href="./vendor/normalize.css/normalize.css">
+    <!--<link rel="stylesheet" href="./vendor/normalize.css/normalize.css">-->
+    
+    <!--Bootstrap CDN version-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <!--Bootstrap local version (3.4.0)-->
+    <!--<link rel="stylesheet" href="./cdn-fallback/bootstrap.min.css">-->
     <link rel="stylesheet" href="./index.css">
+    <!--Material Icons CDN version-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!--Material Icons local version-->
+    <!--<link rel="stylesheet" href="./cdn-fallback/material-icons.css">-->
 
 </head>
 <body>
-    <!-- The "app" element is where the code for dynamic updates is attached -->
-    <div id="app">
-        <h1>
-            Welcome to UIbuilder for Node-RED
-        </h1>
-        <p>
-            This is the default web page. If you open the developer console, you will see some debug output.
-            You can also see some dynamic data updating below, thanks to JQuery.
-        </p>
-        <p>
-            Please see the README for the
-            <a href="https://github.com/TotallyInformation/node-red-contrib-uibuilder">node-red-contrib-uibuilder</a>
-            node for details on how to use UIbuilder.
-        </p>
-        <h2>Dynamic Data (via JQuery)</h2>
-        <p>Messages Received: <span id="msgsReceived"></span></p>
-        <p>Messages Sent: <span id="msgsSent"></span></p>
-        <p>Last Message Received:</p>
-        <code id="showMsg"></code>
-        <p>Last Control Message Received:</p>
-        <code id="showCtrlMsg"></code>
-        <p>Last Message Sent:</p>
-        <code id="showMsgSent"></code>
-        <p>Last Payload: <span id="latestPayload"></span></p>
+    <div class="container">
+        <div class="well well-sm">
+            <strong>Display</strong>
+            <div class="btn-group">
+                <a href="#" id="list" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-th-list">
+                </span>List</a> <a href="#" id="grid" class="btn btn-default btn-sm"><span
+                    class="glyphicon glyphicon-th"></span>Grid</a>
+            </div>
+            <button class="btn btn-info addRow">Add empty slot</button>
+        </div>
+        <div id="elements" class="row list-group">       
+        </div>
+
+        
+
+
+        <!--modal for adding sensors-->
+        <div id="modalAdd" class="modal fade" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header text-center">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Add sensor</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="modalForm" role="form">
+                            <div class="form-group has-error">
+                                    <label data-error="wrong" data-success="right" for="formName"><i class="material-icons fas prefix" style="font-size: 20px; vertical-align: middle;">local_offer</i> Name</label>
+                                    <input type="text" id="formName" class="form-control validate" placeholder="ex. Temperature sensor outside" required="true">
+                                </div>
+                                <div class="form-group">
+                                    <label data-error="wrong" data-success="right" for="dropdownType"><i class="material-icons" style="font-size: 20px; vertical-align: middle;">settings_input_hdmi</i> Type</label>
+                                    <div class="dropdown">
+                                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownType" data-toggle="dropdown">Type <span class="caret"></span></button>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="#" data-value="sensorDHT11">DHT11 Temp., Hum.</a></li>
+                                            <li><a href="#" data-value="sensorBME280">BME280 Temp., Hum., Press.</a></li>
+                                            <li><a href="#" data-value="sensorHCSR501">PIR (HCSR 501)</a></li>
+                                            <li><a href="#" data-value="sensorButton">Taster</a></li>
+                                            <li class="divider"></li>
+                                            <li><a href="#" data-value="sensorOther">Other</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label data-error="wrong" data-success="right" for="formDelay"><i class="material-icons" style="font-size: 20px; vertical-align: middle;">access_time</i> Call delay</label>
+                                    <input type="number" id="formDelay" class="form-control validate" placeholder="Delay in ms, ex. 100" required="true" min="0">
+                                </div>
+                                <br>
+                                <div class="form-group">
+                                    <label data-error="wrong" data-success="right" for="formGpio"><i class="material-icons" style="font-size: 20px; vertical-align: middle;">settings_input_component</i> GPIO port</label>
+                                    <input type="number" id="formGpio" class="form-control validate" placeholder="First GPIO pin" required="true" min="0">
+                                </div>
+                                <p>Alternative:</p>
+                                <div class="form-group">
+                                    <label data-error="wrong" data-success="right" for="formIp"><i class="material-icons" style="font-size: 20px; vertical-align: middle;">router</i> IP address</label>
+                                    <input pattern="^([0-9]{1,3}\.){3}[0-9]{1,3}$" id="formIp" class="form-control validate" placeholder="127.0.0.1" required="true">
+                                </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" form="modalForm" class="btn btn-primary">Confirm</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--modal for deleting sensors-->
+        <div id="modalDelete" class="modal fade" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header text-center">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Delete sensor</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Do you really want to delete this sensor?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="modalDelConfirm">Confirm</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div>
-        <input type="text" id="inputTest">
-        <button type="button" id="btnSend">Send</button>
-    </div>
+
+    <!--templates of single elements for the grid-->
+    <!--complete elem-->
+    <script id="templateFullElem" type="text/x-custom-template">
+        <div class="item  col-xs-4 col-lg-4" >
+            <div class="thumbnail" draggable="true">
+                <img class="group list-group-image" src="sensor.jpg" alt="" />
+                <div class="overlay overlayFade">
+                    <div class="overlayText">Hold to move</div>
+                </div>
+                <div class="caption">
+                    <h4 class="group inner list-group-item-heading lead">
+                        %TITLE%</h4>
+                    <p class="group inner list-group-item-text">
+                        Delay: %DELAY% ms<br>GPIO: %GPIO% and following..<br>IP: %IP%<br></p>
+                    <div class="row">
+                        <div class="col-xs-12 col-md-6">
+                            <p class="lead">Status</p>
+                        </div>
+                        <div class="col-xs-12 col-md-6">
+                            <a class="btn btn-danger" href="#" data-toggle="modal" data-target="#modalDelete">Delete</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <!--empty elem-->
+    <script id="templateEmptyElem" type="text/x-custom-template">
+        <div class="item  col-xs-4 col-lg-4">
+            <div class="thumbnail" draggable="true">
+                <div class="overlay overlayFade" data-toggle="modal" data-target="#modalAdd">
+                    <i class="material-icons overlayText" style="font-size: 52px;">add_circle_outline</i>
+                </div>
+            </div>
+        </div>
+    </script>
 
 
     <!-- These MUST be in the right order. Note no leading / -->
@@ -88,13 +182,21 @@
                    Without this, you don't get a websocket connection -->
     <script src="/uibuilder/socket.io/socket.io.js"></script>
     <!-- Note no leading / -->
-    <!-- OPTIONAL: JQuery can be removed if not required 
-                   (on some installations you have to remove `dist/` -->
+    <!--jQuery CDN version-->
+    <!--<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>-->
     <script src="./vendor/jquery/dist/jquery.min.js"></script>
     <!-- REQUIRED: Sets up Socket listeners and the msg object -->
     <script src="./uibuilderfe.min.js"></script>
     <!-- OPTIONAL: You probably want this. Put your custom code here -->
     <script src="./index.js"></script>
-
+    
+    <!--Popper CDN version-->
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>-->
+    <!--Popper local version (1.14.7)-->
+    <script src="./cdn-fallback/popper.min.js"></script>
+    <!--Bootstrap CDN version-->
+    <!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>-->
+    <!--Bootstrap local version (3.4.0)-->
+    <script src="./cdn-fallback/bootstrap.min.js"></script>
 </body>
 </html>

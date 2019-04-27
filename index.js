@@ -1,18 +1,7 @@
+// jshint maxerr:1000
 /*global document,$,window,uibuilder */
 /*
-  Copyright (c) 2017 Julian Knight (Totally Information)
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-  http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
+  Based on uibuilder example by Julian Knight (Totally Information)
 */
 /** This script is usable as is though you will want to add your own code to process incoming and outgoing messages.
  *
@@ -69,14 +58,10 @@
  *       .timerid       - internal use only
  *       .events        - list of registered events
  */
-'use strict';
+//'use strict';
 
 // When JQuery is ready, update
 $( document ).ready(function() {
-    // Initial set
-    $('#msgsReceived').text( uibuilder.get('msgsReceived') );
-    $('#msgsSent').text( uibuilder.get('msgsSent') );
-
     // Turn on debugging for uibuilderfe (default is off)
     uibuilder.debug(true);
 
@@ -97,66 +82,207 @@ $( document ).ready(function() {
     // You can also set things manually. See the list of attributes top of page.
     // You can add arbitrary attributes to the object, you cannot overwrite internal attributes
 
-    // Try setting a restricted, internal attribute - see the warning in the browser console
-    uibuilder.set('msg', 'You tried but failed! (index.js)');
-
-    // Remember that onChange functions don't trigger if you haven't set them
-    // up BEFORE an attribute change.
-    uibuilder.onChange('msgCopy', function(newVal){
-        console.info('indexjs:msgCopy: New value is: ', newVal);
-    });
-
-    // Now try setting a new attribute - this will be an empty object because
-    // msg won't yet have been received
-    uibuilder.set('msgCopy', uibuilder.msg);
-    // Hint: Try putting this set into the onChange for 'msg'
-
-    // As noted, we could get the msg here too
-    uibuilder.onChange('msgsReceived', function(newVal){
-        console.info('indexjs:msgsReceived: New msg sent to us from Node-RED over Socket.IO. Total Count: ', newVal);
-        $('#msgsReceived').text(newVal);
-        // uibuilder.msg is a shortcut for uibuilder.get('msg')
-        //$('#showMsg').text(JSON.stringify(uibuilder.msg))
-    });
-
     // If Socket.IO connects/disconnects
     uibuilder.onChange('ioConnected', function(newVal){
         console.info('indexjs:ioConnected: Socket.IO Connection Status Changed: ', newVal);
-        $('#socketConnectedState').text(newVal);
     });
 
     // If a message is sent back to Node-RED
     uibuilder.onChange('msgsSent', function(newVal){
         console.info('New msg sent to Node-RED over Socket.IO. Total Count: ', newVal);
-        $('#msgsSent').text(newVal);
-        $('#showMsgSent').text(JSON.stringify(uibuilder.get('sentMsg')));
     });
 
     // If we receive a control message from Node-RED
     uibuilder.onChange('msgsCtrl', function(newVal){
         console.info('indexjs:msgsCtrl: New control msg sent to us from Node-RED over Socket.IO. Total Count: ', newVal);
-        $('#msgsControl').text(newVal);
-        $('#showCtrlMsg').text(JSON.stringify(uibuilder.get('ctrlMsg')));
+    });
+    
+    //------------------------------------------------------------------
+    $('#list').click(function(event){
+        event.preventDefault();
+        $('#elements .item').addClass('list-group-item');
+    });
+    $('#grid').click(function(event) {
+        event.preventDefault();
+        $('#elements .item').removeClass('list-group-item');
+        $('#elements .item').addClass('grid-group-item');
     });
 
-    //Manually send a message back to Node-RED after 2 seconds
-    window.setTimeout(function(){
-        console.info('indexjs:setTimeout: Sending a message back to Node-RED - after 2s delay');
-        uibuilder.send( { 'topic':'uibuilderfe', 'payload':'I am a message sent from the uibuilder front end (index.js)' } );
-    }, 2000);
+    var modalAddCaller;
+    var modalDelCaller;
 
-    // Manually send a control message. Include cacheControl:REPLAY to test cache handling
-    // Shouldn't be needed in this example since window.load will also send cacheControl and we should
-    // be done before then.
-    uibuilder.sendCtrl({'cacheControl': 'REPLAY'});
+    $(document).on('shown.bs.modal', '#modalAdd', function(event) {
+        //get element that triggered the modal
+        var triggerElement = $(event.relatedTarget);
+        modalAddCaller = triggerElement[0].parentElement.parentElement;
+        console.log(triggerElement[0].parentElement.parentElement);
+    });
+    
+    $(document).on('shown.bs.modal', '#modalDelete', function(event) {
+        //get element that triggered the modal
+        var triggerElement = $(event.relatedTarget);
+        modalDelCaller = triggerElement[0].parentElement.parentElement.parentElement.parentElement.parentElement;
+        console.log(triggerElement[0].parentElement.parentElement.parentElement.parentElement.parentElement);
+    });
 
+    // modal type dropdown
+    $('.dropdown-menu li a').click(function() {
+        $(this).parents('.dropdown').find('.btn').html($(this).text() + ' <span class="caret"></span>');
+        $(this).parents('.dropdown').find('.btn').val($(this).data('value'));
+    });
+
+    // handle modal submit
+    $('#modalForm').on('submit', function(e) {
+        e.preventDefault();
+        var nameVal = $('#formName').val();
+        var typeVal = $('#dropdownType').val();
+        if (typeVal === "") {
+            //no type specified
+            alert("Please choose a sensor type");
+            return;
+        }
+        var delayVal = $('#formDelay').val();
+        var gpioVal = $('#formGpio').val();
+        var ipVal = $('#formIp').val();
+
+        var collection = {
+            'nameVal': nameVal,
+            'typeVal': typeVal,
+            'delayVal': delayVal,
+            'gpioVal': gpioVal,
+            'ipVal': ipVal
+        };
+        uibuilder.send({'topic':'modalDataAdd', 'payload': collection});       
+
+        //close modal
+        $('#modalAdd').modal('hide');
+        
+        //replace empty element with completed one
+        var completeTemplate = $('#templateFullElem').html();
+        completeTemplate = completeTemplate
+            .replace('%TITLE%', nameVal)
+            .replace('%DELAY%', delayVal)
+            .replace('%GPIO%', gpioVal)
+            .replace('%IP%', ipVal);
+        if (typeVal != "sensorOther") {
+            switch (typeVal) {
+                case 'sensorDHT11':
+                    completeTemplate = completeTemplate.replace('sensor.jpg', 'static/dht11.jpg');
+                    break;
+                case 'sensorBME280':
+                    completeTemplate = completeTemplate.replace('sensor.jpg', 'static/bme280.jpg');
+                    break;
+                case 'sensorHCSR501':
+                    completeTemplate = completeTemplate.replace('sensor.jpg', 'static/hcsr501.jpg');
+                    break;
+                case 'sensorButton':
+                    completeTemplate = completeTemplate.replace('sensor.jpg', 'static/button.jpg');
+                    break;
+            
+                default:
+                    break;
+            }
+        }
+
+
+        $(modalAddCaller).replaceWith($(completeTemplate).clone());
+        addDragEventListeners();    //recall listener adding to make new elements draggable
+    });
+    
+    $('#modalDelConfirm').click(function() {
+        uibuilder.send({'topic': 'modalDel', 'payload':'THIS NEEDS TO BE CHANGED'});
+        
+        //close modal
+        $('#modalDelete').modal('hide');
+        
+        //replace complete element with empty one
+        var emptyTemplate = $('#templateEmptyElem').html();
+        $(modalDelCaller).replaceWith($(emptyTemplate).clone());
+        addDragEventListeners();    //recall listener adding to make new elements draggable
+    });
+    
+    // add empty elements
+    $('button.addRow').click(function(){
+        var emptyTemplate = $('#templateEmptyElem').html();
+        addRowFunc(emptyTemplate);
+    });
+
+    function addRowFunc(template) {
+        var item = $(template).clone();
+        $('#elements').append(item);
+        addDragEventListeners();    //recall listener adding to make new elements draggable
+    }
+    
 }); // --- End of JQuery Ready --- //
 
-$('#btnSend').click(function(event){
-    event.preventDefault();
-    var temp = $('#inputTest').val();
-    console.log(temp);
-    uibuilder.send({'topic':'uiTest', 'payload': temp});
-});
 
-// EOF
+//++++++++++++++++++++++++++++++++++++++++++++Drag-and-Drop++++++++++++++++++++++++++++++++++++++++++++
+
+var dragSrcEl = null;
+
+function handleDragStart(e) {
+    this.style.opacity = '0.4';  // this / e.target is the source node.
+    dragSrcEl = this;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.innerHTML);
+}
+
+function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault(); // Necessary. Allows us to drop.
+    }
+
+    e.dataTransfer.dropEffect = 'move';
+
+    return false;
+}
+
+function handleDragEnter(e) {
+    // this / e.target is the current hover target.
+    this.classList.add('over');
+}
+
+function handleDragLeave(e) {
+    this.classList.remove('over');  // this / e.target is previous target element.
+}
+
+function handleDrop(e) {
+    // this / e.target is current target element.
+
+    if (e.stopPropagation) {
+        e.stopPropagation(); // stops the browser from redirecting.
+    }
+
+    if (dragSrcEl != this) {
+        // Set the source column's HTML to the HTML of the columnwe dropped on.
+        dragSrcEl.innerHTML = this.innerHTML;
+        this.innerHTML = e.dataTransfer.getData('text/html');
+    }
+
+    return false;
+}
+
+function handleDragEnd(e) {
+    // this/e.target is the source node.
+    this.style.opacity = '1.0';
+
+    var cols = document.querySelectorAll('#elements .item .thumbnail');
+    [].forEach.call(cols, function (col) {
+        col.classList.remove('over');
+    });
+}
+
+function addDragEventListeners(e) {
+    var cols = document.querySelectorAll('#elements .item .thumbnail');
+    [].forEach.call(cols, function(col) {
+        col.addEventListener('dragstart', handleDragStart, false);
+        col.addEventListener('dragenter', handleDragEnter, false);
+        col.addEventListener('dragover', handleDragOver, false);
+        col.addEventListener('dragleave', handleDragLeave, false);
+        col.addEventListener('drop', handleDrop, false);
+        col.addEventListener('dragend', handleDragEnd, false);
+    });
+}
+
+addDragEventListeners();
+
