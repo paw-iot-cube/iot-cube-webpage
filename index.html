@@ -32,7 +32,7 @@
         <link rel="apple-touch-icon" sizes="192x192" href="/images/manifest/icon-192x192.png">
       -->
 
-    <title>IoT-Cube | Home</title>
+    <title>Dashboard | PAW IOT-Cube</title>
     <meta name="description" content="Home of the PAW IoT-Cube">
 
     <link rel="icon" href="./images/node-blue.ico">
@@ -40,141 +40,66 @@
     <!-- OPTIONAL: Normalize is used to make things the same across browsers. Index is for your styles -->
     <!--<link rel="stylesheet" href="./vendor/normalize.css/normalize.css">-->
     
-    <!--Bootstrap CDN version-->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
-    <!--Bootstrap local version (3.4.0)-->
-    <!--<link rel="stylesheet" href="./cdn-fallback/bootstrap.min.css">-->
-    <link rel="stylesheet" href="./index.css">
-    <!--Material Icons CDN version-->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <!--Material Icons local version-->
-    <!--<link rel="stylesheet" href="./cdn-fallback/material-icons.css">-->
+    <!-- Bootstrap core CSS -->
+    <link href="cdn-fallback/bootstrap.min.css" rel="stylesheet">
+    <link href="index.css" rel="stylesheet">
 
 </head>
 <body>
-    <div class="container">
-        <div class="well well-sm">
-            <strong>Display</strong>
-            <div class="btn-group">
-                <a href="#" id="list" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-th-list">
-                </span>List</a> <a href="#" id="grid" class="btn btn-default btn-sm"><span
-                    class="glyphicon glyphicon-th"></span>Grid</a>
-            </div>
-            <button class="btn btn-info addRow">Add empty slot</button>
-        </div>
-        <div id="elements" class="row list-group">       
-        </div>
+    <div class="d-flex toggled" id="wrapper">
 
-        
-
-
-        <!--modal for adding sensors-->
-        <div id="modalAdd" class="modal fade" role="dialog">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-header text-center">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Add sensor</h4>
-                    </div>
-                    <div class="modal-body">
-                        <form id="modalForm" role="form">
-                            <div class="form-group has-error">
-                                    <label data-error="wrong" data-success="right" for="formName"><i class="material-icons fas prefix" style="font-size: 20px; vertical-align: middle;">local_offer</i> Name</label>
-                                    <input type="text" id="formName" class="form-control validate" placeholder="ex. Temperature sensor outside" required="true">
-                                </div>
-                                <div class="form-group">
-                                    <label data-error="wrong" data-success="right" for="dropdownType"><i class="material-icons" style="font-size: 20px; vertical-align: middle;">settings_input_hdmi</i> Type</label>
-                                    <div class="dropdown">
-                                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownType" data-toggle="dropdown">Type <span class="caret"></span></button>
-                                        <ul class="dropdown-menu">
-                                            <li><a href="#" data-value="sensorDHT11">DHT11 Temp., Hum.</a></li>
-                                            <li><a href="#" data-value="sensorBME280">BME280 Temp., Hum., Press.</a></li>
-                                            <li><a href="#" data-value="sensorHCSR501">PIR (HCSR 501)</a></li>
-                                            <li><a href="#" data-value="sensorButton">Taster</a></li>
-                                            <li class="divider"></li>
-                                            <li><a href="#" data-value="sensorOther">Other</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label data-error="wrong" data-success="right" for="formDelay"><i class="material-icons" style="font-size: 20px; vertical-align: middle;">access_time</i> Call delay</label>
-                                    <input type="number" id="formDelay" class="form-control validate" placeholder="Delay in ms, ex. 100" required="true" min="0">
-                                </div>
-                                <br>
-                                <div class="form-group">
-                                    <label data-error="wrong" data-success="right" for="formGpio"><i class="material-icons" style="font-size: 20px; vertical-align: middle;">settings_input_component</i> GPIO port</label>
-                                    <input type="number" id="formGpio" class="form-control validate" placeholder="First GPIO pin" required="true" min="0">
-                                </div>
-                                <p>Alternative:</p>
-                                <div class="form-group">
-                                    <label data-error="wrong" data-success="right" for="formIp"><i class="material-icons" style="font-size: 20px; vertical-align: middle;">router</i> IP address</label>
-                                    <input pattern="^([0-9]{1,3}\.){3}[0-9]{1,3}$" id="formIp" class="form-control validate" placeholder="127.0.0.1" required="true">
-                                </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" form="modalForm" class="btn btn-primary">Confirm</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    </div>
-                </div>
+        <!--Sidebar-->
+        <div class="bg-light border-right" id="sidebar-wrapper">
+            <div class="sidebar-heading">PAW IOT-Cube</div>
+            <div class="list-group list-group-flush">
+                <a href="/dashboard" class="list-group-item list-group-item-action active">
+                    <i data-feather="home"></i>
+                    Dashboard
+                </a>
+                <a href="/deviceoverview" class="list-group-item list-group-item-action bg-light">
+                    <i data-feather="list"></i>
+                    Devices Overview
+                </a>
+                <a href="/devicesettings" class="list-group-item list-group-item-action bg-light">
+                    <i data-feather="settings"></i>
+                    Devices Settings
+                </a>
+                <a href="#" class="list-group-item list-group-item-action bg-light">
+                    <i data-feather="send"></i>
+                    MQTT Settings
+                </a>
             </div>
         </div>
-        <!--modal for deleting sensors-->
-        <div id="modalDelete" class="modal fade" role="dialog">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-header text-center">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Delete sensor</h4>
-                    </div>
-                    <div class="modal-body">
-                        <p>Do you really want to delete this sensor?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" id="modalDelConfirm">Confirm</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+
+        <!--Page content-->
+        <div id="page-content-wrapper">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                <!--<button class="btn btn-primary" id="menu-toggle">Toggle sidebar</button>--><!--#menu-toggle defines object to toggle the sidebar-->
+
+                <button class="btn btn-primary" id="menu-toggle">
+                    <div class="icon-bar1"></div>
+                    <div class="icon-bar2"></div>
+                    <div class="icon-bar3"></div>
+                </button>
+            </nav>
+
+            <div class="container-fluid">
+                <h1 class="mt-4">Dashboard</h1>
+                <p>Bla bla</p>
+
+                <!--example chart-->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body" id="test">
+                                <canvas id="chLine"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!--templates of single elements for the grid-->
-    <!--complete elem-->
-    <script id="templateFullElem" type="text/x-custom-template">
-        <div class="item  col-xs-4 col-lg-4" >
-            <div class="thumbnail" draggable="true">
-                <img class="group list-group-image" src="sensor.jpg" alt="" />
-                <div class="overlay overlayFade">
-                    <div class="overlayText">Hold to move</div>
-                </div>
-                <div class="caption">
-                    <h4 class="group inner list-group-item-heading lead">
-                        %TITLE%</h4>
-                    <p class="group inner list-group-item-text">
-                        Delay: %DELAY% ms<br>GPIO: %GPIO% and following..<br>IP: %IP%<br></p>
-                    <div class="row">
-                        <div class="col-xs-12 col-md-6">
-                            <p class="lead">Status</p>
-                        </div>
-                        <div class="col-xs-12 col-md-6">
-                            <a class="btn btn-danger" href="#" data-toggle="modal" data-target="#modalDelete">Delete</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </script>
-    <!--empty elem-->
-    <script id="templateEmptyElem" type="text/x-custom-template">
-        <div class="item  col-xs-4 col-lg-4">
-            <div class="thumbnail" draggable="true">
-                <div class="overlay overlayFade" data-toggle="modal" data-target="#modalAdd">
-                    <i class="material-icons overlayText" style="font-size: 52px;">add_circle_outline</i>
-                </div>
-            </div>
-        </div>
-    </script>
 
 
     <!-- These MUST be in the right order. Note no leading / -->
@@ -184,19 +109,27 @@
     <!-- Note no leading / -->
     <!--jQuery CDN version-->
     <!--<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>-->
-    <script src="./vendor/jquery/dist/jquery.min.js"></script>
+    <!--<script src="./vendor/jquery/dist/jquery.min.js"></script>-->
+    <script src="cdn-fallback/jquery-3.3.1.slim.min.js"></script>
     <!-- REQUIRED: Sets up Socket listeners and the msg object -->
     <script src="./uibuilderfe.min.js"></script>
-    <!-- OPTIONAL: You probably want this. Put your custom code here -->
-    <script src="./index.js"></script>
+    <script src="cdn-fallback/popper.min.js"></script>
+    <script src="cdn-fallback/bootstrap.min.js"></script>
+    <script src="cdn-fallback/feather.min.js"></script>
+    <script src="cdn-fallback/Chart.js"></script>
+    <script src="cdn-fallback/moment.js"></script>
+    <script src="index.js"></script>
     
-    <!--Popper CDN version-->
-    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>-->
-    <!--Popper local version (1.14.7)-->
-    <script src="./cdn-fallback/popper.min.js"></script>
-    <!--Bootstrap CDN version-->
-    <!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>-->
-    <!--Bootstrap local version (3.4.0)-->
-    <script src="./cdn-fallback/bootstrap.min.js"></script>
+    <script>
+        feather.replace()
+    </script>
+    <!--Menu toggle script-->
+    <script>
+        $('#menu-toggle').click(function (e) {
+            e.preventDefault();
+            $('#wrapper').toggleClass('toggled');
+            $('#menu-toggle').toggleClass('change');
+        });
+    </script>
 </body>
 </html>
