@@ -89,18 +89,17 @@ $( document ).ready(function() {
     // If msg changes - msg is updated when a standard msg is received from Node-RED over Socket.IO
     // Note that you can also listen for 'msgsReceived' as they are updated at the same time
     // but newVal relates to the attribute being listened to.
-    var test = false;
+    uibuilder.onChange('msg', function(newMsg) {
+        console.info('indexjs:msg: property msg has changed! ', newMsg);
+        //check if msg is data supply on page load or data update
+        if (newMsg.topic == "onLoadData" && newMsg.payload == "lastItem") {
+            //makeCharts(newMsg, '#007bff');
+            fillDashboardWithData(newMsg);
 
-    uibuilder.onChange('msg', function(newVal) {
-        console.info('indexjs:msg: property msg has changed! ', newVal);
-        console.log(newVal);
-        if (!test) {
-            makeChart(newVal, 'chLine', '#007bff');
-            test = true;
-            console.log("new chart");
+            console.log("new charts");
         }
-        else {
-            addToLineChart(lineChart, newVal, '#007bff');
+        else if (newMsg.topic == "updateData") {
+            addToLineChart(lineChart, newMsg, '#007bff');
             console.log("add/update");
         }
 
@@ -110,23 +109,88 @@ $( document ).ready(function() {
 }); // --- End of JQuery Ready --- //
 
 
+function fillDashboardWithData(msg) {
+    //colour for chart lines
+    var colour = '#007bff';
+
+    msg.dashboardData.forEach(element => {
+        //build ids for linking with template
+        var groupId = "card-grp-" + element.numberGroup.toString();
+        var itemId = groupId + "-item-" + element.numberItem.toString();
+        if (element.htmlId.includes("chart")) {
+            var canvasId = "canv-grp-" + element.numberGroup.toString() + "-item-" + element.numberItem.toString();
+        }
+
+        //fill said ids with data
+        //fill group titles
+        $('#' + groupId).find('.card-header').text(msg.dashboardGroups.find(x => x.htmlId === groupId).name);
+        
+        //fill item titles and values
+        switch (element.measType) {
+            case "Hum":
+                if (element.uiType == "val") {
+                    $('#' + itemId).find('.card-title').text("Current humidity");
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " %");
+                    }
+                }
+                else if (element.uiType == "chart") {
+                    $('#' + itemId).find('.card-title').text("Humidity history [%]");
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        makeChart(element.DataPoints, canvasId, colour);
+                    }
+                }
+                break;
+            case "Temp":
+                if (element.uiType == "val") {
+                    $('#' + itemId).find('.card-title').text("Current temperature");
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " °C");
+                    }
+                }
+                else if (element.uiType == "chart") {
+                    $('#' + itemId).find('.card-title').text("Temperature history [°C]");
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        makeChart(element.DataPoints, canvasId, colour);
+                    }
+                }
+                break;
+            //add other cases
+        
+            default:
+                break;
+        }
+
+    });
+}
+
+
+
+
 var lineChart;
 
-function makeChart(msgObject, canvasId, colour) {
+function makeChart(dataArray, canvasId, colour) {
     // chart
     var canvas = $('#' + canvasId);
-    
-    
+
+    var inputTimes = [];
+    var inputData = [];
+    //extract data parts from array
+    dataArray.forEach(element => {
+        inputTimes.push(element.timeunix);
+        inputData.push(element.value);
+    });
+
+
+
     //var inputTitle = "Humidity history";
     //var inputTimes = [1558121936, 1558121937, 1558121938, 1558121939, 1558121940];
     //var inputData = [30, 31, 33.5, 30.2, 29.4];
-    var inputTitle = msgObject.chart.title;
-    var inputTimes = msgObject.chart.times;
-    var inputData = msgObject.chart.data;
+    
     var inputLabels = [];
     
     var timeFormat =  'HH:mm:ss';
-    console.log(inputData);
+    //console.log(inputData);
     
     //generate displayed time
     $.each(inputTimes, function (indexInArray, valueOfElement) {
@@ -150,10 +214,6 @@ function makeChart(msgObject, canvasId, colour) {
             type: 'line',
             data: chartData,
             options: {
-                title: {
-                    display: true,
-                    text: inputTitle
-                },
                 scales: {
                     yAxes: [{
                         ticks: {
