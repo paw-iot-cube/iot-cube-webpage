@@ -6,19 +6,10 @@
     <html lang="en" manifest="uibuilder.appcache">
   -->
 <html lang="en">
-<!--
-    This is the default, template html for uibuilder.
-    It is only meant to demonstrate the use of JQuery to dynamically
-    update the ui based on incoming/outgoing messages from/to the
-    Node-RED server.
-
-    You will want to alter this to suite your own needs. To do so,
-    copy this file to <userDir>/uibuilder/<url>/src.
-  -->
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- See https://goo.gl/OOhYW5 -->
     <link rel="manifest" href="./manifest.json">
@@ -41,57 +32,194 @@
         <link rel="apple-touch-icon" sizes="192x192" href="/images/manifest/icon-192x192.png">
       -->
 
-    <title>Node-RED UI Builder</title>
-    <meta name="description" content="Node-RED UI Builder">
+    <title>Dashboard | PAW IOT-Cube</title>
+    <meta name="description" content="Home of the PAW IoT-Cube">
 
     <link rel="icon" href="./images/node-blue.ico">
 
     <!-- OPTIONAL: Normalize is used to make things the same across browsers. Index is for your styles -->
-    <link rel="stylesheet" href="./vendor/normalize.css/normalize.css">
-    <link rel="stylesheet" href="./index.css">
+    <!--<link rel="stylesheet" href="./vendor/normalize.css/normalize.css">-->
+    
+    <!-- Bootstrap core CSS -->
+    <link href="cdn-fallback/bootstrap.min.css" rel="stylesheet">
+    <link href="index.css" rel="stylesheet">
 
 </head>
 <body>
-    <!-- The "app" element is where the code for dynamic updates is attached -->
-    <div id="app">
-        <h1>
-            Welcome to UIbuilder for Node-RED
-        </h1>
-        <p>
-            This is the default web page. If you open the developer console, you will see some debug output.
-            You can also see some dynamic data updating below, thanks to JQuery.
-        </p>
-        <p>
-            Please see the README for the
-            <a href="https://github.com/TotallyInformation/node-red-contrib-uibuilder">node-red-contrib-uibuilder</a>
-            node for details on how to use UIbuilder.
-        </p>
-        <h2>Dynamic Data (via JQuery)</h2>
-        <p>UIBuilder Front-End Version: <span id="feVersion"></span></p>
-        <p>Websocket State: <span id="socketConnectedState"></span></p>
-        <p>Messages Received: <span id="msgsReceived"></span></p>
-        <p>Control Messages Received: <span id="msgsControl"></span></p>
-        <p>Messages Sent: <span id="msgsSent"></span></p>
-        <p>Last Message Received:</p>
-        <code id="showMsg"></code>
-        <p>Last Control Message Received:</p>
-        <code id="showCtrlMsg"></code>
-        <p>Last Message Sent:</p>
-        <code id="showMsgSent"></code>
+    <div class="d-flex toggled" id="wrapper">
+
+        <!--Sidebar-->
+        <div class="bg-light border-right" id="sidebar-wrapper">
+            <div class="sidebar-heading">PAW IOT-Cube</div>
+            <div class="list-group list-group-flush">
+                <a href="/dashboard" class="list-group-item list-group-item-action active">
+                    <i data-feather="home"></i>
+                    Dashboard
+                </a>
+                <a href="/deviceoverview" class="list-group-item list-group-item-action bg-light">
+                    <i data-feather="list"></i>
+                    Devices Overview
+                </a>
+                <a href="/devicesettings" class="list-group-item list-group-item-action bg-light">
+                    <i data-feather="settings"></i>
+                    Devices Settings
+                </a>
+                <a href="#" class="list-group-item list-group-item-action bg-light">
+                    <i data-feather="send"></i>
+                    MQTT Settings
+                </a>
+            </div>
+        </div>
+
+        <!--Page content-->
+        <div id="page-content-wrapper">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                <!--<button class="btn btn-primary" id="menu-toggle">Toggle sidebar</button>--><!--#menu-toggle defines object to toggle the sidebar-->
+
+                <button class="btn btn-primary" id="menu-toggle">
+                    <div class="icon-bar1"></div>
+                    <div class="icon-bar2"></div>
+                    <div class="icon-bar3"></div>
+                </button>
+            </nav>
+
+            <div class="container-fluid">
+                <div class="col main mt-3">
+                    <h1 class="display-4">Dashboard</h1>
+
+                    <div class="mb-3">
+                        <!--Row-->
+                        <div class="card-deck mt-3">
+                            <!--Group-->
+                            <div class="card" id="card-grp-1">
+                                <div class="card-header">
+                                    <span></span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="card-deck">
+                                        <div class="card" id="card-grp-1-item-1">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-uppercase"></h6>
+                                                <h3 class="display-4"></h3>
+                                            </div>
+                                        </div>
+                                        <div class="card" id="card-grp-1-item-2">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-uppercase"></h6>
+                                                <canvas id="canv-grp-1-item-2"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Group-->
+                            <div class="card" id="card-grp-2">
+                                <div class="card-header">
+                                    <span></span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="card-deck">
+                                        <div class="card" id="card-grp-2-item-1">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-uppercase"></h6>
+                                                <h3 class="display-4"></h3>
+                                            </div>
+                                        </div>
+                                        <div class="card" id="card-grp-2-item-2">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-uppercase"></h6>
+                                                <canvas id="canv-grp-2-item-2"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--Row-->
+                        <div class="card-deck mt-3">
+                            <!--Group-->
+                            <div class="card" id="card-grp-3">
+                                <div class="card-header">
+                                    <span></span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="card-deck">
+                                        <div class="card" id="card-grp-3-item-1">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-uppercase"></h6>
+                                                <h3 class="display-4"></h3>
+                                            </div>
+                                        </div>
+                                        <div class="card" id="card-grp-3-item-2">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-uppercase"></h6>
+                                                <canvas id="canv-grp-3-item-2"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Group-->
+                            <div class="card" id="card-grp-4">
+                                <div class="card-header">
+                                    <span></span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="card-deck">
+                                        <div class="card" id="card-grp-4-item-1">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-uppercase"></h6>
+                                                <h3 class="display-4"></h3>
+                                            </div>
+                                        </div>
+                                        <div class="card" id="card-grp-4-item-2">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-uppercase"></h6>
+                                                <canvas id="canv-grp-4-item-2"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
     </div>
+
 
     <!-- These MUST be in the right order. Note no leading / -->
     <!-- REQUIRED: Socket.IO is loaded only once for all instances
                    Without this, you don't get a websocket connection -->
     <script src="/uibuilder/socket.io/socket.io.js"></script>
     <!-- Note no leading / -->
-    <!-- OPTIONAL: JQuery can be removed if not required 
-                   (on some installations you have to remove `dist/` -->
-    <script src="./vendor/jquery/dist/jquery.min.js"></script>
+    <!--jQuery CDN version-->
+    <!--<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>-->
+    <!--<script src="./vendor/jquery/dist/jquery.min.js"></script>-->
+    <script src="cdn-fallback/jquery-3.3.1.slim.min.js"></script>
     <!-- REQUIRED: Sets up Socket listeners and the msg object -->
     <script src="./uibuilderfe.min.js"></script>
-    <!-- OPTIONAL: You probably want this. Put your custom code here -->
-    <script src="./index.js"></script>
-
+    <script src="cdn-fallback/popper.min.js"></script>
+    <script src="cdn-fallback/bootstrap.min.js"></script>
+    <script src="cdn-fallback/feather.min.js"></script>
+    <script src="cdn-fallback/Chart.js"></script>
+    <script src="cdn-fallback/moment.js"></script>
+    <script src="index.js"></script>
+    
+    <script>
+        feather.replace()
+    </script>
+    <!--Menu toggle script-->
+    <script>
+        $('#menu-toggle').click(function (e) {
+            e.preventDefault();
+            $('#wrapper').toggleClass('toggled');
+            $('#menu-toggle').toggleClass('change');
+        });
+    </script>
 </body>
 </html>

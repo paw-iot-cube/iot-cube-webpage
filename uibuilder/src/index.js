@@ -93,8 +93,17 @@ $( document ).ready(function() {
         console.info('indexjs:msg: property msg has changed! ', newMsg);
         //check if msg is data supply on page load or data update
         if (newMsg.topic == "onLoadData" && newMsg.payload == "lastItem") {
-            //makeCharts(newMsg, '#007bff');
-            fillDashboardWithData(newMsg);
+            //ensure, every item has data points attached
+            var isMissingDataPoints = false;
+            newMsg.dashboardData.forEach(element => {
+                if (typeof element.DataPoints === 'undefined') {
+                    isMissingDataPoints = true;
+                }
+            });
+
+            if (!isMissingDataPoints) {
+                fillDashboardWithData(newMsg);
+            }
 
             console.log("new charts");
         }
