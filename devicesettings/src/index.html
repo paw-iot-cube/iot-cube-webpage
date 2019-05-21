@@ -1,0 +1,132 @@
+<!doctype html>
+<!-- Note that adding an appcache really speeds things up after the first load
+     You need to amend the appcache file to meet your needs.
+     Don't forget to change the appcache file if you update ANY
+     of the files in it otherwise the old versions will ALWAYS be used.
+    <html lang="en" manifest="uibuilder.appcache">
+  -->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- See https://goo.gl/OOhYW5 -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#3f51b5">
+
+    <!-- Used if adding to homescreen for Chrome on Android. Fallback for manifest.json -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Node-RED UI Builder">
+
+    <!-- Used if adding to homescreen for Safari on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Node-RED UI Builder">
+
+    <!-- Homescreen icons for Apple mobile use if required
+        <link rel="apple-touch-icon" href="/images/manifest/icon-48x48.png">
+        <link rel="apple-touch-icon" sizes="72x72" href="/images/manifest/icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="96x96" href="/images/manifest/icon-96x96.png">
+        <link rel="apple-touch-icon" sizes="144x144" href="/images/manifest/icon-144x144.png">
+        <link rel="apple-touch-icon" sizes="192x192" href="/images/manifest/icon-192x192.png">
+      -->
+
+    <title>Device Settings | PAW IOT-Cube</title>
+    <meta name="description" content="Home of the PAW IoT-Cube">
+
+    <link rel="icon" href="./images/node-blue.ico">
+
+    <!-- OPTIONAL: Normalize is used to make things the same across browsers. Index is for your styles -->
+    <!--<link rel="stylesheet" href="./vendor/normalize.css/normalize.css">-->
+    
+    <!-- Bootstrap core CSS -->
+    <link href="cdn-fallback/bootstrap.min.css" rel="stylesheet">
+    <link href="index.css" rel="stylesheet">
+
+</head>
+<body>
+    <div class="d-flex toggled" id="wrapper">
+
+        <!--Sidebar-->
+        <div class="bg-light border-right" id="sidebar-wrapper">
+            <div class="sidebar-heading">PAW IOT-Cube</div>
+            <div class="list-group list-group-flush">
+                <a href="/dashboard" class="list-group-item list-group-item-action bg-light">
+                    <i data-feather="home"></i>
+                    Dashboard
+                </a>
+                <a href="/deviceoverview" class="list-group-item list-group-item-action bg-light">
+                    <i data-feather="list"></i>
+                    Devices Overview
+                </a>
+                <a href="/devicesettings" class="list-group-item list-group-item-action active">
+                    <i data-feather="settings"></i>
+                    Devices Settings
+                </a>
+                <a href="#" class="list-group-item list-group-item-action bg-light">
+                    <i data-feather="send"></i>
+                    MQTT Settings
+                </a>
+            </div>
+        </div>
+
+        <!--Page content-->
+        <div id="page-content-wrapper">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                <!--<button class="btn btn-primary" id="menu-toggle">Toggle sidebar</button>--><!--#menu-toggle defines object to toggle the sidebar-->
+
+                <button class="btn btn-primary" id="menu-toggle">
+                    <div class="icon-bar1"></div>
+                    <div class="icon-bar2"></div>
+                    <div class="icon-bar3"></div>
+                </button>
+            </nav>
+
+            <div class="container-fluid">
+                <div class="col main mt-3">
+                    <h1 class="display-4">Device Settings</h1>
+
+                    <div class="mb-3">
+                        
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- These MUST be in the right order. Note no leading / -->
+    <!-- REQUIRED: Socket.IO is loaded only once for all instances
+                   Without this, you don't get a websocket connection -->
+    <script src="/uibuilder/socket.io/socket.io.js"></script>
+    <!-- Note no leading / -->
+    <!--jQuery CDN version-->
+    <!--<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>-->
+    <!--<script src="./vendor/jquery/dist/jquery.min.js"></script>-->
+    <script src="cdn-fallback/jquery-3.3.1.slim.min.js"></script>
+    <!-- REQUIRED: Sets up Socket listeners and the msg object -->
+    <script src="./uibuilderfe.min.js"></script>
+    <script src="cdn-fallback/popper.min.js"></script>
+    <script src="cdn-fallback/bootstrap.min.js"></script>
+    <script src="cdn-fallback/feather.min.js"></script>
+    <script src="cdn-fallback/Chart.js"></script>
+    <script src="cdn-fallback/moment.js"></script>
+    <script src="index.js"></script>
+    
+    <script>
+        feather.replace()
+    </script>
+    <!--Menu toggle script-->
+    <script>
+        $('#menu-toggle').click(function (e) {
+            e.preventDefault();
+            $('#wrapper').toggleClass('toggled');
+            $('#menu-toggle').toggleClass('change');
+        });
+    </script>
+</body>
+</html>
