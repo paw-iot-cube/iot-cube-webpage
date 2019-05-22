@@ -101,7 +101,13 @@ $( document ).ready(function() {
                 }
             });
 
-            if (!isMissingDataPoints) {
+            if (typeof newMsg.dashboardGroups === 'undefined') {
+                isMissingDataPoints = true;
+            }
+
+            if (!isMissingDataPoints && $('#grid').children().length == 0) {
+                generateGrid(newMsg);
+
                 fillDashboardWithData(newMsg);
             }
 
@@ -118,6 +124,112 @@ $( document ).ready(function() {
 }); // --- End of JQuery Ready --- //
 
 
+function generateGrid(msg) {
+    var maxGroupsInRow = 2;
+    var rowOpenTemplate = '<!--Row-->'
+                        + '<div class="card-deck mt-3">';
+    var template = '';
+
+    if (msg.dashboardGroups.length > maxGroupsInRow) {
+        for (let i = 0; i < (msg.dashboardGroups.length); i += 2) {
+            console.log(i);
+
+            template += rowOpenTemplate;
+
+            //generate group templates
+            template += generateGridGroupWithItems(msg.dashboardGroups[i].htmlId, msg.dashboardGroups[i].items);
+            //check if odd number of groups and not last groups to prevent exception in last group
+            if ((msg.dashboardGroups.length % 2) == 0 || i < (msg.dashboardGroups.length - 2)) {
+                template += generateGridGroupWithItems(msg.dashboardGroups[i+1].htmlId, msg.dashboardGroups[i+1].items);
+            }
+
+            template += '</div>';
+        }       
+
+    }
+    else {
+        template += rowOpenTemplate;
+
+        //generate group templates
+        msg.dashboardGroups.forEach(element => {
+            template += generateGridGroupWithItems(element.htmlId, element.items);
+        });
+
+        template += '</div>';
+    }
+
+    $('#grid').append(template);
+}
+
+function generateGridGroupWithItems(grpId, items) {
+    var groupOpenTemplate = '<!--Group-->'
+                            + '<div class="card" id="card-grp-' + grpId + '">'
+                            + '<div class="card-header">'
+                            + '<span></span>'
+                            + '</div>'
+                            + '<div class="card-body">';
+
+    var template = '';
+    template += groupOpenTemplate;
+
+    template += generateGridItems(grpId, items);
+    template += '</div>'
+                + '</div>';
+
+    return template;
+}
+
+function generateGridItems(grpId, items) {
+    var itemRowTemplate = '<!--ItemRow-->'
+                        + '<div class="card-deck">';
+
+    var maxItemsInRow = 3;
+    var template = '';
+    var processedItemsCount = 0;
+
+    if (items.length > maxItemsInRow) {
+        // do something different                       <-------------------------  !!
+    }
+    else {
+        template += itemRowTemplate;
+
+        items.forEach(function(element, index) {
+            template += generateGridItem(grpId, index+1, element);
+        });
+
+        template += '</div>';
+    }
+
+    return template;
+}
+
+function generateGridItem(grpId, itemId, itemType) {
+    var itemOpenTemplate = '<div class="card" id="card-grp-' + grpId + '-item-' + itemId + '">'
+                        + '<div class="card-body">'
+                        + '<h6 class="card-title text-uppercase"></h6>';
+
+    var itemValTemplate = '<h3 class="display-4"></h3>'
+                        + '</div>'
+                        + '</div>';
+    var itemChartTemplate = '<canvas id="canv-grp-' + grpId + '-item-' + itemId + '"></canvas>'
+                        + '</div>'
+                        + '</div>';
+
+    var template = '';
+    template += itemOpenTemplate;
+
+    if (itemType == "value") {
+        template += itemValTemplate;
+    }
+    else if (itemType == "chart") {
+        template += itemChartTemplate;
+    }
+
+    return template;
+}
+
+
+
 function fillDashboardWithData(msg) {
     //colour for chart lines
     var colour = '#007bff';
@@ -132,7 +244,7 @@ function fillDashboardWithData(msg) {
 
         //fill said ids with data
         //fill group titles
-        $('#' + groupId).find('.card-header').text(msg.dashboardGroups.find(x => x.htmlId === groupId).name);
+        $('#' + groupId).find('.card-header').text(msg.dashboardGroups.find(x => x.htmlId === (element.numberGroup.toString())).name);
         
         //fill item titles and values
         switch (element.measType) {

@@ -101,9 +101,38 @@ $( document ).ready(function() {
     // If msg changes - msg is updated when a standard msg is received from Node-RED over Socket.IO
     // Note that you can also listen for 'msgsReceived' as they are updated at the same time
     // but newVal relates to the attribute being listened to.
-    uibuilder.onChange('msg', function(newVal){
-        console.info('indexjs:msg: property msg has changed! ', newVal);
-    })
+    uibuilder.onChange('msg', function(newMsg){
+        console.info('indexjs:msg: property msg has changed! ', newMsg);
+
+        //check if msg is sent on load
+        if (newMsg.topic == "onLoadData" && $('#mainTableBody').children().length == 0) {
+            newMsg.overviewData.forEach(function(element, index) {
+                if (element.status == "disconnected") {
+                    var trOpenTemplate = '<tr class="table-danger">';
+                }
+                else {
+                    var trOpenTemplate = '<tr>';
+                }
+                
+                var tableDataTemplate = trOpenTemplate
+                                        + '<th scope="row">' + (index+1) + '</th>'
+                                        + '<td>' + element.deviceId + '</td>'
+                                        + '<td>' + element.deviceIp + '</td>'
+                                        + '<td>' + element.dispName + '</td>'
+                                        + '<td>' + element.deviceCategory.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }) + '</td>'
+                                        + '<td>' + element.deviceType + '</td>'
+                                        + '<td>' + element.isVisible.toString().replace("1", "Yes").replace("0", "No") + '</td>'
+                                        + '<td>' + element.status.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }) + '</td>'
+                                        + '</tr>';
+                
+                
+                $('#mainTableBody').append(tableDataTemplate);
+            });
+        }
+
+
+
+    });
 
 }) // --- End of JQuery Ready --- //
 
