@@ -1,3 +1,4 @@
 /**/cdn-fallback
 *.appcache
 manifest.json
+data.zip

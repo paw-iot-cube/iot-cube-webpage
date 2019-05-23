@@ -69,41 +69,92 @@
  *       .timerid       - internal use only
  *       .events        - list of registered events
  */
-'use strict'
+//'use strict'
+
+var onLoadMsg;
 
 // When JQuery is ready, update
 $( document ).ready(function() {
-    // Initial set
-    $('#msgsReceived').text( uibuilder.get('msgsReceived') )
-    $('#msgsControl').text( uibuilder.get('msgsCtrl') )
-    $('#msgsSent').text( uibuilder.get('msgsSent') )
-    $('#socketConnectedState').text( uibuilder.get('ioConnected') )
-    $('#feVersion').text( uibuilder.get('version') )
-
     // Turn on debugging for uibuilderfe (default is off)
-    uibuilder.debug(true)  
+    uibuilder.debug(true);  
 
     // If Socket.IO connects/disconnects
     uibuilder.onChange('ioConnected', function(newVal){
-        console.info('indexjs:ioConnected: Socket.IO Connection Status Changed: ', newVal)
-    })
+        console.info('indexjs:ioConnected: Socket.IO Connection Status Changed: ', newVal);
+    });
 
     // If a message is sent back to Node-RED
     uibuilder.onChange('msgsSent', function(newVal){
-        console.info('New msg sent to Node-RED over Socket.IO. Total Count: ', newVal)
-    })
+        console.info('New msg sent to Node-RED over Socket.IO. Total Count: ', newVal);
+    });
 
     // If we receive a control message from Node-RED
     uibuilder.onChange('msgsCtrl', function(newVal){
-        console.info('indexjs:msgsCtrl: New control msg sent to us from Node-RED over Socket.IO. Total Count: ', newVal)
-    })
+        console.info('indexjs:msgsCtrl: New control msg sent to us from Node-RED over Socket.IO. Total Count: ', newVal);
+    });
 
     // If msg changes - msg is updated when a standard msg is received from Node-RED over Socket.IO
     // Note that you can also listen for 'msgsReceived' as they are updated at the same time
     // but newVal relates to the attribute being listened to.
-    uibuilder.onChange('msg', function(newVal){
-        console.info('indexjs:msg: property msg has changed! ', newVal);
-    })
+    uibuilder.onChange('msg', function(newMsg){
+        console.info('indexjs:msg: property msg has changed! ', newMsg);
 
-}) // --- End of JQuery Ready --- //
+        if (newMsg.topic == "onLoadData") {
+            onLoadMsg = newMsg;
 
+
+            //fill items
+            newMsg.settingsInputData.forEach(function(element, index) {
+                //$('#img-' + element.deviceId.toString()).attr('src', '');       // TODO   <<--------------------------------  !!
+                $('#title-' + element.deviceId.toString()).text(element.deviceType);
+                $('#name-' + element.deviceId.toString()).text(element.dispName);
+                $('#status-' + element.deviceId.toString()).text(element.status.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }));
+                $('#ip-' + element.deviceId.toString()).text(element.deviceIp);
+                
+                if (element.deviceCategory == "sensor") {
+                    $('#latest-' + element.deviceId.toString()).text('');               // TODO   <<--------------------------------  !!
+                }
+            });
+        }
+        
+    });
+
+}); // --- End of JQuery Ready --- //
+
+
+
+$(document).on('shown.bs.modal', '#sensorModalCon', function(event) {
+    //get element that triggered the modal
+    var triggerElement = $(event.relatedTarget);
+    
+    console.log($(triggerElement[0]).attr('id'));
+
+    fillSensorModal($(triggerElement[0]).attr('id').replace('card-', ''));
+});
+
+
+
+function fillSensorModal(callerId) {
+    var sensorDataElement = onLoadMsg.settingsInputData.find(x => x.deviceId.toString() === callerId);
+    
+    $('#sensorId').text(sensorDataElement.deviceId);
+    $('#sensorIp').text(sensorDataElement.deviceIp);
+    $('#sensorType').text(sensorDataElement.deviceType);        
+    //$('#sensorMeasures').text();                              // TODO (needs editing to show measurements)    <<--------------------------------  !!
+    $('#sensorConn').text(sensorDataElement.status.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }));
+
+    $('#inputName').val(sensorDataElement.dispName);
+    if (sensorDataElement.isVisible == 1) {
+        $('input:radio[name=radioVisibility]')[0].checked = true;
+    }
+    else if (sensorDataElement.isVisible == 0) {
+        $('input:radio[name=radioVisibility]')[1].checked = true;
+    }
+
+    $('#inputDataPointAmount').val(sensorDataElement.shownDataPoints);
+    $('#inputInterval').val(sensorDataElement.interval);
+    
+    // TODO  unit matching type                                                                <<--------------------------------  !!
+
+    // TODO  buttons matching sensor type                                                                <<--------------------------------  !!
+}

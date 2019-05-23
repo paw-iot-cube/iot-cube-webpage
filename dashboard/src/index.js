@@ -232,7 +232,7 @@ function generateGridItem(grpId, itemId, itemType) {
 
 function fillDashboardWithData(msg) {
     //colour for chart lines
-    var colour = '#007bff';
+    var colour = '#0275d8';
 
     msg.dashboardData.forEach(element => {
         //build ids for linking with template

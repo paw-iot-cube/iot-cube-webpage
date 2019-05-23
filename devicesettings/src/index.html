@@ -83,6 +83,103 @@
                 </button>
             </nav>
 
+            <!--Sensor modal when connected-->
+            <div class="modal fade" id="sensorModalCon" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Sensor configuration</h5>
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <!--Info part-->
+                            <p class="text-body">
+                                Sensor ID: <span class="text-primary" id="sensorId">100100200</span><br>
+                                Sensor IP: <span class="text-primary" id="sensorIp">192.168.1.11</span><br>
+                                Sensor type: <span class="text-primary" id="sensorType">DHT 11</span> <span class="text-primary" id="sensorMeasures">(measures: Temperature, Humidity)</span><br>
+                                Sensor status: <span class="text-success" id="sensorConn">Connected</span><br>
+                            </p>
+                            <hr>
+                            <!--Settings-->
+                            <form>
+                                <div class="form-group">
+                                    <label for="inputName"><i data-feather="at-sign"></i> Displayed name</label>
+                                    <input type="text" class="form-control" id="inputName" placeholder="Living room">
+                                    <small class="form-text text-muted">Select a display name for the Dashboard</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="visibilityChecks"><i data-feather="eye-off"></i> Should the sensor be shown on the dashboard?</label>
+                                    <div id="visibilityChecks">
+                                        <div class="form-check form-check-inline">
+                                            <input type="radio" class="form-check-input" name="radioVisibility" value="visibilityTrue">
+                                            <label class="form-check-label" for="chkVisibilityTrue">Yes</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input type="radio" class="form-check-input" name="radioVisibility" value="visibilityFalse">
+                                            <label class="form-check-label" for="chkVisibilityFalse">No</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputDataPointAmount"><i data-feather="hash"></i> Amount of data displayed on charts</label>
+                                    <input type="number" class="form-control" id="inputDataPointAmount" placeholder="10" min="2">
+                                    <small class="form-text text-muted">How many data points should be used to create the graphs?</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputInterval"><i data-feather="clock"></i> Measuring interval</label>
+                                    <input type="number" class="form-control" id="inputInterval" placeholder="10" min="1">
+                                    <small class="form-text text-muted">How often (in seconds) should new measurements be performed?</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="selectUnit"><i data-feather="percent"></i> Measurement unit</label>
+                                    <select class="form-control" id="selectUnit">
+                                        <option>°C + %</option>
+                                        <option>°F + %</option>
+                                        <option>K + %</option>
+                                    </select>
+                                    <small class="form-text text-muted">What unit should be used to display the values? Note: Logs are still in default unit.</small>
+                                </div>
+                            </form>
+                            <hr>
+                            <!--CSV output-->
+                            <p class="text-body"><i data-feather="file"></i> Request saved data:</p>
+                            <div class="btn-group btn-block">
+                                <button type="button" class="btn btn-primary" id="btnCSVTemp">1a. Temperature CSV</button>
+                                <button type="button" class="btn btn-primary" id="btnCSVHum">1b. Humidity CSV</button>
+                            </div>
+                            <a class="btn btn-primary btn-block mt-1 disabled" href="data.zip" download="data.zip">2. Download</a>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" id="btnSave">Save changes</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Sensor modal when disconnected-->
+            <div class="modal fade" id="sensorModalDiscon" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Sensor configuration</h5>
+                                <button type="button" class="close" data-dismiss="modal">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+    
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
             <div class="container-fluid">
                 <div class="col main mt-3">
                     <h1 class="display-4">Device Settings</h1>
@@ -93,44 +190,69 @@
                                 <span>Sensors</span>
                             </div>
                             <div class="card-body">
-                                <div class="row">
-                                    <div class="col-xl-3">
-                                        <div class="card card-custom">                                            
+                                <div class="row justify-content-center">
+                                    <div class="col-auto mb-3">
+                                        <div class="card card-custom" style="width: 18rem;" data-toggle="modal" data-target="#sensorModalCon" id="card-100100200">
+                                            <div class="overlay overlayFade">
+                                                <div class="overlayText text-center">
+                                                    <i data-feather="edit"></i>
+                                                    <span>Configure</span>
+                                                </div>
+                                            </div>
+                                            <img class="card-img" src="bg/dht11.png" alt="Card image" id="img-100100200">
+                                            <div class="card-img-overlay">                                             
+                                                <h6 class="card-title text-uppercase" id="title-100100200">DHT 11</h6>
+                                                <h6 class="card-subtitle mb-2 text-muted" id="name-100100200">Living room</h6>
+                                                <p class="text-success" id="status-100100200">Connected</p>
+                                                <p class="text-body">
+                                                    IP: <span class="text-primary" id="ip-100100200">192.168.1.1</span><br>
+                                                    Latest value: <span class="text-primary" id="latest-100100200">5 sec ago</span>
+                                                </p>                                                
+                                            </div>                                            
+                                        </div>
+                                    </div>
+                                    <div class="col-auto mb-3">
+                                        <div class="card card-custom border-danger" style="width: 18rem;" data-toggle="modal" data-target="#sensorModalDiscon">
                                             <div class="overlay overlayFade">
                                                 <div class="overlayText">
                                                     <i data-feather="edit"></i>
+                                                    <span>Configure</span>
+                                                </div>
+                                            </div>
+                                            <img class="card-img" src="bg/dht11.png" alt="Card image">
+                                            <div class="card-img-overlay">                                             
+                                                <h6 class="card-title text-uppercase">DHT 11</h6>
+                                                <h6 class="card-subtitle mb-2 text-muted">Kitchen</h6>
+                                                <p class="text-danger">Disconnected</p>                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto mb-3">
+                                        <div class="card card-custom" style="width: 18rem;" data-toggle="modal" data-target="#sensorModalCon">
+                                            <div class="overlay overlayFade">
+                                                <div class="overlayText">
+                                                    <i data-feather="edit"></i>
+                                                    <span>Configure</span>
                                                 </div>
                                             </div>
                                             <img class="card-img" src="bg/dht11.png" alt="Card image">
                                             <div class="card-img-overlay">                                             
                                                 <h6 class="card-title text-uppercase">DHT 11</h6>
                                                 <p>blabla bla</p>                                                
-                                            </div>                                            
-                                        </div>
-                                    </div>
-                                    <div class="col-xl-3">
-                                        <div class="card card-custom">
-                                            <img class="card-img" src="bg/dht11.png" alt="Card image">
-                                            <div class="card-img-overlay">                                             
-                                                <h6 class="card-title text-uppercase">DHT 11</h6>
-                                                <p>blabla bla</p>                                                
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-xl-3">
-                                        <div class="card card-custom">
-                                            <img class="card-img" src="bg/dht11.png" alt="Card image">
-                                            <div class="card-img-overlay">                                             
-                                                <h6 class="card-title text-uppercase">DHT 11</h6>
-                                                <p>blabla bla</p>                                                
+                                    <div class="col-auto mb-3">
+                                        <div class="card card-custom" style="width: 18rem;" data-toggle="modal" data-target="#sensorModalCon">
+                                            <div class="overlay overlayFade">
+                                                <div class="overlayText">
+                                                    <i data-feather="edit"></i>
+                                                    <span>Configure</span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-xl-3">
-                                        <div class="card card-custom">
-                                            <img class="card-img" src="bg/dht11.png" alt="Card image">
+                                            <img class="card-img" src="bg/bme280.png" alt="Card image">
                                             <div class="card-img-overlay">                                             
-                                                <h6 class="card-title text-uppercase">DHT 11</h6>
+                                                <h6 class="card-title text-uppercase">BME 280</h6>
                                                 <p>blabla bla</p>                                                
                                             </div>
                                         </div>
