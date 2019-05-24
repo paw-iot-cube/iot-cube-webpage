@@ -109,3 +109,8 @@ body {
 {
     opacity: 1;
 }
+
+.disabledDiv {
+    pointer-events: none;
+    opacity: 0.4;
+}

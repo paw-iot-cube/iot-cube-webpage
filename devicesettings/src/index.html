@@ -103,7 +103,7 @@
                             </p>
                             <hr>
                             <!--Settings-->
-                            <form>
+                            <form id="formSensor">
                                 <div class="form-group">
                                     <label for="inputName"><i data-feather="at-sign"></i> Displayed name</label>
                                     <input type="text" class="form-control" id="inputName" placeholder="Living room">
@@ -135,9 +135,9 @@
                                 <div class="form-group">
                                     <label for="selectUnit"><i data-feather="percent"></i> Measurement unit</label>
                                     <select class="form-control" id="selectUnit">
-                                        <option>°C + %</option>
-                                        <option>°F + %</option>
-                                        <option>K + %</option>
+                                        <option value="celsius + percent">°C + %</option>
+                                        <option value="fahrenheit + percent">°F + %</option>
+                                        <option value="kelvin + percent">K + %</option>
                                     </select>
                                     <small class="form-text text-muted">What unit should be used to display the values? Note: Logs are still in default unit.</small>
                                 </div>
@@ -152,7 +152,7 @@
                             <a class="btn btn-primary btn-block mt-1 disabled" href="data.zip" download="data.zip">2. Download</a>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" id="btnSave">Save changes</button>
+                            <button type="submit" class="btn btn-primary" form="formSensor" id="btnSensorSave">Save changes</button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                         </div>
                     </div>
@@ -160,24 +160,209 @@
             </div>
             <!--Sensor modal when disconnected-->
             <div class="modal fade" id="sensorModalDiscon" tabindex="-1" role="dialog">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Sensor configuration</h5>
-                                <button type="button" class="close" data-dismiss="modal">
-                                    <span>&times;</span>
-                                </button>
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Sensor configuration</h5>
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body disabledDiv">
+                            <!--Info part-->
+                            <p class="text-body">
+                                Sensor ID: <span class="text-primary" id="sensorIdDiscon"></span><br>
+                                Sensor IP: <span class="text-primary" id="sensorIpDiscon"></span><br>
+                                Sensor type: <span class="text-primary" id="sensorTypeDiscon"></span> <span class="text-primary" id="sensorMeasuresDiscon">(measures: Temperature, Humidity)</span><br>
+                                Sensor status: <span class="text-danger" id="sensorConnDiscon"></span><br>
+                            </p>
+                            <hr>
+                            <!--Settings-->
+                            <form>
+                                <div class="form-group">
+                                    <label for="inputNameDiscon"><i data-feather="at-sign"></i> Displayed name</label>
+                                    <input type="text" class="form-control" id="inputNameDiscon" placeholder="Living room">
+                                    <small class="form-text text-muted">Select a display name for the Dashboard</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="visibilityChecksDiscon"><i data-feather="eye-off"></i> Should the sensor be shown on the dashboard?</label>
+                                    <div id="visibilityChecksDiscon">
+                                        <div class="form-check form-check-inline">
+                                            <input type="radio" class="form-check-input" name="radioVisibilityDiscon" value="visibilityTrue">
+                                            <label class="form-check-label" for="chkVisibilityTrue">Yes</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input type="radio" class="form-check-input" name="radioVisibilityDiscon" value="visibilityFalse">
+                                            <label class="form-check-label" for="chkVisibilityFalse">No</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputDataPointAmountDiscon"><i data-feather="hash"></i> Amount of data displayed on charts</label>
+                                    <input type="number" class="form-control" id="inputDataPointAmountDiscon" placeholder="10" min="2">
+                                    <small class="form-text text-muted">How many data points should be used to create the graphs?</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputIntervalDiscon"><i data-feather="clock"></i> Measuring interval</label>
+                                    <input type="number" class="form-control" id="inputIntervalDiscon" placeholder="10" min="1">
+                                    <small class="form-text text-muted">How often (in seconds) should new measurements be performed?</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="selectUnitDiscon"><i data-feather="percent"></i> Measurement unit</label>
+                                    <select class="form-control" id="selectUnitDiscon">
+                                        <option>°C + %</option>
+                                        <option>°F + %</option>
+                                        <option>K + %</option>
+                                    </select>
+                                    <small class="form-text text-muted">What unit should be used to display the values? Note: Logs are still in default unit.</small>
+                                </div>
+                            </form>
+                            <hr>
+                            <!--CSV output-->
+                            <p class="text-body"><i data-feather="file"></i> Request saved data:</p>
+                            <div class="btn-group btn-block">
+                                <button type="button" class="btn btn-primary" id="btnCSVTempDiscon">1a. Temperature CSV</button>
+                                <button type="button" class="btn btn-primary" id="btnCSVHumDiscon">1b. Humidity CSV</button>
                             </div>
-                            <div class="modal-body">
-    
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                            </div>
+                            <a class="btn btn-primary btn-block mt-1 disabled" href="data.zip" download="data.zip">2. Download</a>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                         </div>
                     </div>
                 </div>
-
+            </div>
+            <!--Actuator modal when connected-->
+            <div class="modal fade" id="actuatorModalCon" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Actuator configuration</h5>
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <!--Info part-->
+                            <p class="text-body">
+                                Actuator ID: <span class="text-primary" id="actuatorId"></span><br>
+                                Actuator IP: <span class="text-primary" id="actuatorIp"></span><br>
+                                Actuator type: <span class="text-primary" id="actuatorType"></span><br>
+                                Actuator status: <span class="text-success" id="actuatorConn"></span><br>
+                            </p>
+                            <hr>
+                            <!--Settings-->
+                            <form id="formActuator">
+                                <div class="form-group">
+                                    <label for="inputActuatorName"><i data-feather="at-sign"></i> Displayed name</label>
+                                    <input type="text" class="form-control" id="inputActuatorName" placeholder="Lamp">
+                                    <small class="form-text text-muted">Select a display name</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="manualChecks"><i data-feather="toggle-left"></i> Manual control</label>
+                                    <div id="manualChecks">
+                                        <div class="form-check form-check-inline">
+                                            <input type="radio" class="form-check-input" name="radioManual" value="manualOn">
+                                            <label class="form-check-label" for="chkManualOn">On</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input type="radio" class="form-check-input" name="radioManual" value="manualOff">
+                                            <label class="form-check-label" for="chkManualOff">Off</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="selectSensorLink"><i data-feather="link"></i> Link to a sensor</label>
+                                    <select class="form-control" id="selectSensorLink">
+                                        <option value="0">None</option>
+                                    </select>
+                                    <small class="form-text text-muted">Should the actuator be linked to a sensor?</small>
+                                    <br>
+                                    <select class="form-control mb-2" id="selectThreshold">
+                                        <option value="GT">Trigger if higher than..</option>
+                                        <option value="LT">Trigger if lower than..</option>
+                                    </select>
+                                    <input type="number" class="form-control" id="inputThreshold" placeholder="10">
+                                    <small class="form-text text-muted">At what threshold should the actuator toggle?</small>
+                                    <br>
+                                    <select class="form-control mb-2" id="selectMeasurand">
+                                    </select>
+                                    <small class="form-text text-muted">Which measurand should be linked?</small>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" form="formActuator" id="btnActuatorSave">Save changes</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Actuator modal when disconnected-->
+            <div class="modal fade" id="actuatorModalDiscon" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Actuator configuration</h5>
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body disabledDiv">
+                            <!--Info part-->
+                            <p class="text-body">
+                                Actuator ID: <span class="text-primary" id="actuatorIdDiscon"></span><br>
+                                Actuator IP: <span class="text-primary" id="actuatorIpDiscon"></span><br>
+                                Actuator type: <span class="text-primary" id="actuatorTypeDiscon"></span><br>
+                                Actuator status: <span class="text-danger" id="actuatorConnDiscon"></span><br>
+                            </p>
+                            <hr>
+                            <!--Settings-->
+                            <form>
+                                <div class="form-group">
+                                    <label for="inputActuatorName"><i data-feather="at-sign"></i> Displayed name</label>
+                                    <input type="text" class="form-control" id="inputActuatorNameDiscon" placeholder="Lamp">
+                                    <small class="form-text text-muted">Select a display name</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="manualChecks"><i data-feather="toggle-left"></i> Manual control</label>
+                                    <div id="manualChecks">
+                                        <div class="form-check form-check-inline">
+                                            <input type="radio" class="form-check-input" name="radioManualDiscon" value="manualOn">
+                                            <label class="form-check-label" for="chkManualOn">On</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input type="radio" class="form-check-input" name="radioManualDiscon" value="manualOff">
+                                            <label class="form-check-label" for="chkManualOff">Off</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="selectSensorLink"><i data-feather="link"></i> Link to a sensor</label>
+                                    <select class="form-control" id="selectSensorLinkDiscon">
+                                        <option value="0">None</option>
+                                    </select>
+                                    <small class="form-text text-muted">Should the actuator be linked to a sensor?</small>
+                                    <br>
+                                    <select class="form-control mb-2" id="selectThresholdDiscon">
+                                        <option value="GT">Trigger if higher than..</option>
+                                        <option value="LT">Trigger if lower than..</option>
+                                    </select>
+                                    <input type="number" class="form-control" id="inputThresholdDiscon" placeholder="10">
+                                    <small class="form-text text-muted">At what threshold should the actuator toggle?</small>
+                                    <br>
+                                    <select class="form-control mb-2" id="selectMeasurandDiscon">
+                                    </select>
+                                    <small class="form-text text-muted">Which measurand should be linked?</small>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
 
             <div class="container-fluid">
@@ -185,79 +370,37 @@
                     <h1 class="display-4">Device Settings</h1>
 
                     <div class="mb-3">
-                        <div class="card">
+                        <div class="card mb-3">
                             <div class="card-header">
                                 <span>Sensors</span>
                             </div>
                             <div class="card-body">
-                                <div class="row justify-content-center">
-                                    <div class="col-auto mb-3">
-                                        <div class="card card-custom" style="width: 18rem;" data-toggle="modal" data-target="#sensorModalCon" id="card-100100200">
-                                            <div class="overlay overlayFade">
-                                                <div class="overlayText text-center">
-                                                    <i data-feather="edit"></i>
-                                                    <span>Configure</span>
-                                                </div>
-                                            </div>
-                                            <img class="card-img" src="bg/dht11.png" alt="Card image" id="img-100100200">
-                                            <div class="card-img-overlay">                                             
-                                                <h6 class="card-title text-uppercase" id="title-100100200">DHT 11</h6>
-                                                <h6 class="card-subtitle mb-2 text-muted" id="name-100100200">Living room</h6>
-                                                <p class="text-success" id="status-100100200">Connected</p>
-                                                <p class="text-body">
-                                                    IP: <span class="text-primary" id="ip-100100200">192.168.1.1</span><br>
-                                                    Latest value: <span class="text-primary" id="latest-100100200">5 sec ago</span>
-                                                </p>                                                
-                                            </div>                                            
-                                        </div>
-                                    </div>
-                                    <div class="col-auto mb-3">
-                                        <div class="card card-custom border-danger" style="width: 18rem;" data-toggle="modal" data-target="#sensorModalDiscon">
-                                            <div class="overlay overlayFade">
-                                                <div class="overlayText">
-                                                    <i data-feather="edit"></i>
-                                                    <span>Configure</span>
-                                                </div>
-                                            </div>
-                                            <img class="card-img" src="bg/dht11.png" alt="Card image">
-                                            <div class="card-img-overlay">                                             
-                                                <h6 class="card-title text-uppercase">DHT 11</h6>
-                                                <h6 class="card-subtitle mb-2 text-muted">Kitchen</h6>
-                                                <p class="text-danger">Disconnected</p>                                                
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-auto mb-3">
-                                        <div class="card card-custom" style="width: 18rem;" data-toggle="modal" data-target="#sensorModalCon">
-                                            <div class="overlay overlayFade">
-                                                <div class="overlayText">
-                                                    <i data-feather="edit"></i>
-                                                    <span>Configure</span>
-                                                </div>
-                                            </div>
-                                            <img class="card-img" src="bg/dht11.png" alt="Card image">
-                                            <div class="card-img-overlay">                                             
-                                                <h6 class="card-title text-uppercase">DHT 11</h6>
-                                                <p>blabla bla</p>                                                
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-auto mb-3">
-                                        <div class="card card-custom" style="width: 18rem;" data-toggle="modal" data-target="#sensorModalCon">
-                                            <div class="overlay overlayFade">
-                                                <div class="overlayText">
-                                                    <i data-feather="edit"></i>
-                                                    <span>Configure</span>
-                                                </div>
-                                            </div>
-                                            <img class="card-img" src="bg/bme280.png" alt="Card image">
-                                            <div class="card-img-overlay">                                             
-                                                <h6 class="card-title text-uppercase">BME 280</h6>
-                                                <p>blabla bla</p>                                                
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div class="row justify-content-center" id="sensorCardArea">
+                                    
+                                    
                                 </div>
+                            </div>
+                        </div>
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <span>Actuators</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="row justify-content-center" id="actuatorCardArea">
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <span>Add Tasmota device (experimental)</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-warning">
+                                    Due to the way Tasmota works differently to our own firmware, you can add a Tasmota device and view its current value, but cannot change any settings!
+                                </div>
+                                
+                                <!--todo: form to add Tasmota devices-->
                             </div>
                         </div>
                     </div>
@@ -289,7 +432,7 @@
     <script src="index.js"></script>
     
     <script>
-        feather.replace()
+        feather.replace();
     </script>
     <!--Menu toggle script-->
     <script>

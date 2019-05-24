@@ -99,20 +99,46 @@ $( document ).ready(function() {
     uibuilder.onChange('msg', function(newMsg){
         console.info('indexjs:msg: property msg has changed! ', newMsg);
 
-        if (newMsg.topic == "onLoadData") {
+        if (newMsg.topic == "onLoadData" && newMsg.payload == "lastItem" && $('#sensorCardArea').children().length == 0 && $('#actuatorCardArea').children().length == 0) {
             onLoadMsg = newMsg;
 
+            //generate items
+            var sensorTemplate = generateSensorCardsTemplate(newMsg);
+            $('#sensorCardArea').append(sensorTemplate);
+
+            var actuatorTemplate = generateActuatorCardsTemplate(newMsg);
+            $('#actuatorCardArea').append(actuatorTemplate);
+
+            feather.replace();
 
             //fill items
             newMsg.settingsInputData.forEach(function(element, index) {
-                //$('#img-' + element.deviceId.toString()).attr('src', '');       // TODO   <<--------------------------------  !!
+                $('#img-' + element.deviceId.toString()).attr('src', 'bg/' + element.deviceType + '.png');
                 $('#title-' + element.deviceId.toString()).text(element.deviceType);
                 $('#name-' + element.deviceId.toString()).text(element.dispName);
                 $('#status-' + element.deviceId.toString()).text(element.status.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }));
-                $('#ip-' + element.deviceId.toString()).text(element.deviceIp);
                 
-                if (element.deviceCategory == "sensor") {
-                    $('#latest-' + element.deviceId.toString()).text('');               // TODO   <<--------------------------------  !!
+                if (element.status == "connected") {                    
+                    $('#ip-' + element.deviceId.toString()).text(element.deviceIp);
+                
+                    if (element.deviceCategory == "sensor") {
+                        $('#card-' + element.deviceId.toString()).attr('data-target', '#sensorModalCon');
+                        $('#latest-' + element.deviceId.toString()).text(element.lastReceivedVal.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }));
+                    }
+                    else if (element.deviceCategory == "actuator") {
+                        $('#card-' + element.deviceId.toString()).attr('data-target', '#actuatorModalCon');
+                    }
+                }
+                else {
+                    $('#status-' + element.deviceId.toString()).removeClass('text-success').addClass('text-danger');
+                    $('#smallInfo-' + element.deviceId.toString()).empty();
+
+                    if (element.deviceCategory == "sensor") {
+                        $('#card-' + element.deviceId.toString()).attr('data-target', '#sensorModalDiscon').addClass('border-danger');
+                    }
+                    else if (element.deviceCategory == "actuator") {
+                        $('#card-' + element.deviceId.toString()).attr('data-target', '#actuatorModalDiscon').addClass('border-danger');
+                    }
                 }
             });
         }
@@ -121,40 +147,369 @@ $( document ).ready(function() {
 
 }); // --- End of JQuery Ready --- //
 
-
+var modalSensorConCaller;
+var modalSensorDisconCaller;
+var modalActuatorConCaller;
+var modalActuatorDisconCaller;
 
 $(document).on('shown.bs.modal', '#sensorModalCon', function(event) {
     //get element that triggered the modal
     var triggerElement = $(event.relatedTarget);
     
     console.log($(triggerElement[0]).attr('id'));
+    modalSensorConCaller = $(triggerElement[0]).attr('id');
 
-    fillSensorModal($(triggerElement[0]).attr('id').replace('card-', ''));
+    fillSensorModal($(triggerElement[0]).attr('id').replace('card-', ''), 'sensorModalCon');
 });
 
+$(document).on('shown.bs.modal', '#sensorModalDiscon', function(event) {
+    //get element that triggered the modal
+    var triggerElement = $(event.relatedTarget);
+    
+    console.log($(triggerElement[0]).attr('id'));
+    modalSensorDisconCaller = $(triggerElement[0]).attr('id');
+
+    fillSensorModal($(triggerElement[0]).attr('id').replace('card-', ''), 'sensorModalDiscon');
+});
+
+$(document).on('shown.bs.modal', '#actuatorModalCon', function(event) {
+    //get element that triggered the modal
+    var triggerElement = $(event.relatedTarget);
+    
+    console.log($(triggerElement[0]).attr('id'));
+    modalActuatorConCaller = $(triggerElement[0]).attr('id');
+
+    fillActuatorModal($(triggerElement[0]).attr('id').replace('card-', ''), 'actuatorModalCon');
+});
+
+$(document).on('shown.bs.modal', '#actuatorModalDiscon', function(event) {
+    //get element that triggered the modal
+    var triggerElement = $(event.relatedTarget);
+    
+    console.log($(triggerElement[0]).attr('id'));
+    modalActuatorDisconCaller = $(triggerElement[0]).attr('id');
+
+    fillActuatorModal($(triggerElement[0]).attr('id').replace('card-', ''), 'actuatorModalDiscon');
+});
+
+$('#formSensor').on('submit', function(event) {
+    event.preventDefault();
+
+    if ($('input:radio[name=radioVisibility]:checked').val() == 'visibilityTrue') {
+        var isVisible = 1;
+    }
+    else if($('input:radio[name=radioVisibility]:checked').val() == 'visibilityFalse') {
+        var isVisible = 0;
+    }
+
+    var collection = {
+        'deviceId': $('#sensorId').text(),
+        'dispName': $('#inputName').val(),
+        'isVisible': isVisible,
+        'shownDataPoints': $('#inputDataPointAmount').val(),
+        'interval': $('#inputInterval').val()
+        // TODO unit                                                        <<------------------------------------- !!
+    };
+
+    uibuilder.send({
+        'topic': 'settingsSensor',
+        'payload': collection
+    });
+
+    $('#sensorModalCon').modal('hide');
+});
+
+$('#formActuator').on('submit', function(event) {
+    event.preventDefault();
+
+    if ($('input:radio[name=radioManual]:checked').val() == 'manualOn') {
+        var manControl = 1;
+    }
+    else if ($('input:radio[name=radioManual]:checked').val() == 'manualOff') {
+        var manControl = 0;
+    }
+
+    var collection = {
+        'deviceId': $('#actuatorId').text(),
+        'dispName': $('#inputActuatorName').val(),
+        'manControl': manControl,
+        'linkedTo': $('#selectSensorLink option:selected').val(),
+        'linkRule': $('#selectThreshold option:selected').val(),
+        'threshold': $('#inputThreshold').val(),
+        'linkedMeas': $('#selectMeasurand option:selected').val()
+    };
+
+    uibuilder.send({
+        'topic': 'settingsActuator',
+        'payload': collection
+    });
+
+    $('#actuatorModalCon').modal('hide');
+});
+
+//special treatment for "instant" manual control: send changes directly
+$('input:radio[name=radioManual]').change(function() {
+    if (this.value == 'manualOn') {
+        uibuilder.send({
+            'topic': 'actuatorManControl',
+            'payload': {
+                'deviceId': modalActuatorConCaller,
+                'manControl': 1
+            }
+        });
+    }
+    else if (this.value == 'manualOff') {
+        uibuilder.send({
+            'topic': 'actuatorManControl',
+            'payload': {
+                'deviceId': modalActuatorConCaller,
+                'manControl': 0
+            }
+        });
+    }
+});
+
+function generateSensorCardsTemplate(msg) {
+    var colOpenTemplate = '<div class="col-auto mb-3">';
+    var template = '';
+
+    msg.settingsInputData.forEach(function(element, index) {
+        if (element.deviceCategory == "sensor") {
+            var cardOpenTemplate = '<div class="card card-custom" style="width: 18rem;" data-toggle="modal" id="card-'
+                                + element.deviceId + '">';
+            var overlayTemplate = '<div class="overlay overlayFade">'
+                                + '<div class="overlayText text-center">'
+                                + '<p></p>'
+                                + '<i data-feather="edit"></i>'
+                                + '<p>Configure</p>'
+                                + '</div>'
+                                + '</div>';
+            template += colOpenTemplate;
+            template += cardOpenTemplate;
+            template += overlayTemplate;
+
+            template += '<img class="card-img" src="" alt="Card image" id="img-' + element.deviceId + '">';
+            template += '<div class="card-img-overlay">'
+                        + '<h6 class="card-title text-uppercase" id="title-' + element.deviceId + '"></h6>'
+                        + '<h6 class="card-subtitle mb-2 text-muted" id="name-' + element.deviceId + '"></h6>'
+                        + '<p class="text-success" id="status-' + element.deviceId + '"></p>'
+                        + '<p class="text-body" id="smallInfo-' + element.deviceId + '">'
+                        + 'IP: <span class="text-primary" id="ip-' + element.deviceId + '"></span><br>'
+                        + 'Latest value: <span class="text-primary" id="latest-' + element.deviceId + '"></span>'
+                        + '</p>'
+                        + '</div>'
+                        + '</div>'
+                        + '</div>';
+        }
+
+    });
+    
+    return template;
+}
+
+function generateActuatorCardsTemplate(msg) {
+    var colOpenTemplate = '<div class="col-auto mb-3">';
+    var template = '';
+
+    msg.settingsInputData.forEach(function(element, index) {
+        if (element.deviceCategory == "actuator") {
+            var cardOpenTemplate = '<div class="card card-custom" style="width: 18rem;" data-toggle="modal" id="card-'
+                                + element.deviceId + '">';
+            var overlayTemplate = '<div class="overlay overlayFade">'
+                                + '<div class="overlayText text-center">'
+                                + '<p></p>'
+                                + '<i data-feather="edit"></i>'
+                                + '<p>Configure</p>'
+                                + '</div>'
+                                + '</div>';
+            template += colOpenTemplate;
+            template += cardOpenTemplate;
+            template += overlayTemplate;
+
+            template += '<img class="card-img" src="" alt="Card image" id="img-' + element.deviceId + '">';
+            template += '<div class="card-img-overlay">'
+                        + '<h6 class="card-title text-uppercase" id="title-' + element.deviceId + '"></h6>'
+                        + '<h6 class="card-subtitle mb-2 text-muted" id="name-' + element.deviceId + '"></h6>'
+                        + '<p class="text-success" id="status-' + element.deviceId + '"></p>'
+                        + '<p class="text-body" id="smallInfo-' + element.deviceId + '">'
+                        + 'IP: <span class="text-primary" id="ip-' + element.deviceId + '"></span><br>'
+                        + '</p>'
+                        + '</div>'
+                        + '</div>'
+                        + '</div>';
+        }
+    });
+
+    return template;
+}
 
 
-function fillSensorModal(callerId) {
+
+function fillSensorModal(callerId, modalType) {
     var sensorDataElement = onLoadMsg.settingsInputData.find(x => x.deviceId.toString() === callerId);
     
-    $('#sensorId').text(sensorDataElement.deviceId);
-    $('#sensorIp').text(sensorDataElement.deviceIp);
-    $('#sensorType').text(sensorDataElement.deviceType);        
-    //$('#sensorMeasures').text();                              // TODO (needs editing to show measurements)    <<--------------------------------  !!
-    $('#sensorConn').text(sensorDataElement.status.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }));
+    if (modalType == 'sensorModalCon') {
+        $('#sensorId').text(sensorDataElement.deviceId);
+        $('#sensorIp').text(sensorDataElement.deviceIp);
+        $('#sensorType').text(sensorDataElement.deviceType);        
+        //$('#sensorMeasures').text();                              // TODO (needs editing to show measurements)    <<--------------------------------  !!
+        $('#sensorConn').text(sensorDataElement.status.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }));
 
-    $('#inputName').val(sensorDataElement.dispName);
-    if (sensorDataElement.isVisible == 1) {
-        $('input:radio[name=radioVisibility]')[0].checked = true;
-    }
-    else if (sensorDataElement.isVisible == 0) {
-        $('input:radio[name=radioVisibility]')[1].checked = true;
-    }
+        $('#inputName').val(sensorDataElement.dispName);
+        if (sensorDataElement.isVisible == 1) {
+            $('input:radio[name=radioVisibility]')[0].checked = true;
+        }
+        else if (sensorDataElement.isVisible == 0) {
+            $('input:radio[name=radioVisibility]')[1].checked = true;
+        }
 
-    $('#inputDataPointAmount').val(sensorDataElement.shownDataPoints);
-    $('#inputInterval').val(sensorDataElement.interval);
+        $('#inputDataPointAmount').val(sensorDataElement.shownDataPoints);
+        $('#inputInterval').val(sensorDataElement.interval);
+        
+        // TODO  unit matching type                                                                <<--------------------------------  !!
+
+        // TODO  buttons matching sensor type                                                                <<--------------------------------  !!
+    }
+    else if (modalType == 'sensorModalDiscon') {
+        $('#sensorIdDiscon').text(sensorDataElement.deviceId);
+        $('#sensorIpDiscon').text(sensorDataElement.deviceIp);
+        $('#sensorTypeDiscon').text(sensorDataElement.deviceType);        
+        //$('#sensorMeasuresDiscon').text();                              // TODO (needs editing to show measurements)    <<--------------------------------  !!
+        $('#sensorConnDiscon').text(sensorDataElement.status.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }));
+
+        $('#inputNameDiscon').val(sensorDataElement.dispName);
+        if (sensorDataElement.isVisible == 1) {
+            $('input:radio[name=radioVisibilityDiscon]')[0].checked = true;
+        }
+        else if (sensorDataElement.isVisible == 0) {
+            $('input:radio[name=radioVisibilityDiscon]')[1].checked = true;
+        }
+
+        $('#inputDataPointAmountDiscon').val(sensorDataElement.shownDataPoints);
+        $('#inputIntervalDiscon').val(sensorDataElement.interval);
+        
+        // TODO  unit matching type                                                                <<--------------------------------  !!
+
+        // TODO  buttons matching sensor type                                                                <<--------------------------------  !!
+    }
+}
+
+function fillActuatorModal(callerId, modalType) {
+    var actuatorDataElement = onLoadMsg.settingsInputData.find(x => x.deviceId.toString() === callerId);
     
-    // TODO  unit matching type                                                                <<--------------------------------  !!
+    if (modalType == 'actuatorModalCon') {
+        $('#actuatorId').text(actuatorDataElement.deviceId);
+        $('#actuatorIp').text(actuatorDataElement.deviceIp);
+        $('#actuatorType').text(actuatorDataElement.deviceType);
+        $('#actuatorConn').text(actuatorDataElement.status.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }));
+        
+        $('#inputActuatorName').val(actuatorDataElement.dispName);
+        if (actuatorDataElement.manControl == 1) {
+            $('input:radio[name=radioManual]')[0].checked = true;
+        }
+        else if (actuatorDataElement.manControl == 0) {
+            $('input:radio[name=radioManual]')[1].checked = true;
+        }
 
-    // TODO  buttons matching sensor type                                                                <<--------------------------------  !!
+        //generate options for all sensors
+        onLoadMsg.settingsInputData.forEach(function(element, index) {
+            if (element.deviceCategory == 'sensor') {
+                $('#selectSensorLink').append(new Option(element.deviceType + ' - ' + element.dispName, element.deviceId.toString()));
+            }
+        });
+
+        if (actuatorDataElement.linkedTo == 0) {
+            $('#selectSensorLink option[value="0"]').attr('selected', true);
+        }
+        else {
+            var linkedSensor = onLoadMsg.settingsInputData.find(x => x.deviceId === actuatorDataElement.linkedTo);
+            $('#selectSensorLink option[value="' + linkedSensor.deviceId + '"]').attr('selected', true);
+
+            //generate options for linked sensor
+            addOptionsSelectMeasurand('#selectMeasurand', linkedSensor.deviceType);
+        }
+
+        $('#selectThreshold option[value="' + actuatorDataElement.linkRule + '"]').attr('selected', true);
+        $('#inputThreshold').val(actuatorDataElement.threshold);
+
+        $('#selectMeasurand option[value="' + actuatorDataElement.linkedMeas + '"]').attr('selected', true);
+
+        
+
+    }
+    else if (modalType == 'actuatorModalDiscon') {
+        $('#actuatorIdDiscon').text(actuatorDataElement.deviceId);
+        $('#actuatorIpDiscon').text(actuatorDataElement.deviceIp);
+        $('#actuatorTypeDiscon').text(actuatorDataElement.deviceType);
+        $('#actuatorConnDiscon').text(actuatorDataElement.status.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }));
+        
+        $('#inputActuatorNameDiscon').val(actuatorDataElement.dispName);
+        if (actuatorDataElement.manControl == 1) {
+            $('input:radio[name=radioManualDiscon]')[0].checked = true;
+        }
+        else if (actuatorDataElement.manControl == 0) {
+            $('input:radio[name=radioManualDiscon]')[1].checked = true;
+        }
+
+        //generate options for all sensors
+        onLoadMsg.settingsInputData.forEach(function(element, index) {
+            if (element.deviceCategory == 'sensor') {
+                $('#selectSensorLinkDiscon').append(new Option(element.deviceType + ' - ' + element.dispName, element.deviceId.toString()));
+            }
+        });
+
+        if (actuatorDataElement.linkedTo == 0) {
+            $('#selectSensorLinkDiscon option[value="0"]').attr('selected', true);
+        }
+        else {
+            var linkedSensor = onLoadMsg.settingsInputData.find(x => x.deviceId === actuatorDataElement.linkedTo);
+            $('#selectSensorLinkDiscon option[value="' + linkedSensor.deviceId + '"]').attr('selected', true);
+
+            //generate options for linked sensor
+            addOptionsSelectMeasurand('#selectMeasurandDiscon', linkedSensor.deviceType);
+        }
+
+        $('#selectThresholdDiscon option[value="' + actuatorDataElement.linkRule + '"]').attr('selected', true);
+        $('#inputThresholdDiscon').val(actuatorDataElement.threshold);
+
+        $('#selectMeasurandDiscon option[value="' + actuatorDataElement.linkedMeas + '"]').attr('selected', true);
+    }
+}
+
+
+function addOptionsSelectMeasurand(id, deviceType) {
+    $(id).empty();
+    switch (deviceType) {
+        case "DHT11":
+            $(id).append(new Option("Temperature", "T"));
+            $(id).append(new Option("Humidity", "H"));
+            break;
+        case "BME280":
+            $(id).append(new Option("Temperature", "T"));
+            $(id).append(new Option("Humidity", "H"));
+            $(id).append(new Option("Pressure", "P"));
+            break;
+        case "HCSR501":
+            $(id).append(new Option("Motion", "M"));
+            break;
+        case "BUTTON":
+            $(id).append(new Option("Button push", "B"));
+            break;
+        case "TSL2561":
+            $(id).append(new Option("Light intensity", "L"));
+            break;
+        case "HCSR04":
+            $(id).append(new Option("Distance", "D"));
+            break;
+        case "CCS811":
+            $(id).append(new Option("eCO2", "C"));
+            $(id).append(new Option("VOC", "V"));
+            break;
+        case "MAX44009":
+            $(id).append(new Option("Light intensity", "L"));
+            break;
+        // TODO: insert rest of sensors                                                 <<------------------------------ !!
+        default:
+            break;
+    }
 }
