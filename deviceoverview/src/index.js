@@ -106,33 +106,38 @@ $( document ).ready(function() {
 
         //check if msg is sent on load
         if (newMsg.topic == "onLoadData" && $('#mainTableBody').children().length == 0) {
-            newMsg.overviewData.forEach(function(element, index) {
-                if (element.status == "disconnected") {
-                    var trOpenTemplate = '<tr class="table-danger">';
-                }
-                else {
-                    var trOpenTemplate = '<tr>';
-                }
-                
-                var tableDataTemplate = trOpenTemplate
-                                        + '<th scope="row">' + (index+1) + '</th>'
-                                        + '<td>' + element.deviceId + '</td>'
-                                        + '<td>' + element.deviceIp + '</td>'
-                                        + '<td>' + element.dispName + '</td>'
-                                        + '<td>' + element.deviceCategory.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }) + '</td>'
-                                        + '<td>' + element.deviceType + '</td>'
-                                        + '<td>' + element.isVisible.toString().replace("1", "Yes").replace("0", "No") + '</td>'
-                                        + '<td>' + element.status.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }) + '</td>'
-                                        + '</tr>';
-                
-                
-                $('#mainTableBody').append(tableDataTemplate);
-            });
+            fillTable(msg);
         }
-
-
+        else if (newMsg.topic == "discoveryData" || newMsg.topic == "updateData") {
+            $('#mainTableBody').empty();
+            fillTable(msg);
+        }
 
     });
 
 }) // --- End of JQuery Ready --- //
 
+function fillTable(msg) {
+    msg.overviewData.forEach(function(element, index) {
+        if (element.status == "disconnected") {
+            var trOpenTemplate = '<tr class="table-danger">';
+        }
+        else {
+            var trOpenTemplate = '<tr>';
+        }
+        
+        var tableDataTemplate = trOpenTemplate
+                                + '<th scope="row">' + (index+1) + '</th>'
+                                + '<td>' + element.deviceId + '</td>'
+                                + '<td>' + element.deviceIp + '</td>'
+                                + '<td>' + element.dispName + '</td>'
+                                + '<td>' + element.deviceCategory.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }) + '</td>'
+                                + '<td>' + element.deviceType + '</td>'
+                                + '<td>' + element.isVisible.toString().replace("1", "Yes").replace("0", "No") + '</td>'
+                                + '<td>' + element.status.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }) + '</td>'
+                                + '</tr>';
+        
+        
+        $('#mainTableBody').append(tableDataTemplate);
+    });
+}

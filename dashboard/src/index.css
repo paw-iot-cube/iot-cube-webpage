@@ -71,3 +71,8 @@ body {
     -webkit-transform: rotate(45deg) translate(-3.7px, -3.7px);
     transform: rotate(45deg) translate(-3.7px, -3.7px);
 }
+
+.disabledDiv {
+    pointer-events: none;
+    opacity: 0.6;
+}

@@ -71,7 +71,7 @@
  */
 //'use strict'
 
-var onLoadMsg;
+var dataMsg;
 
 // When JQuery is ready, update
 $( document ).ready(function() {
@@ -100,7 +100,7 @@ $( document ).ready(function() {
         console.info('indexjs:msg: property msg has changed! ', newMsg);
 
         if (newMsg.topic == "onLoadData" && newMsg.payload == "lastItem" && $('#sensorCardArea').children().length == 0 && $('#actuatorCardArea').children().length == 0) {
-            onLoadMsg = newMsg;
+            dataMsg = newMsg;
 
             //generate items
             var sensorTemplate = generateSensorCardsTemplate(newMsg);
@@ -112,35 +112,31 @@ $( document ).ready(function() {
             feather.replace();
 
             //fill items
-            newMsg.settingsInputData.forEach(function(element, index) {
-                $('#img-' + element.deviceId.toString()).attr('src', 'bg/' + element.deviceType + '.png');
-                $('#title-' + element.deviceId.toString()).text(element.deviceType);
-                $('#name-' + element.deviceId.toString()).text(element.dispName);
-                $('#status-' + element.deviceId.toString()).text(element.status.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }));
-                
-                if (element.status == "connected") {                    
-                    $('#ip-' + element.deviceId.toString()).text(element.deviceIp);
-                
-                    if (element.deviceCategory == "sensor") {
-                        $('#card-' + element.deviceId.toString()).attr('data-target', '#sensorModalCon');
-                        $('#latest-' + element.deviceId.toString()).text(element.lastReceivedVal.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }));
-                    }
-                    else if (element.deviceCategory == "actuator") {
-                        $('#card-' + element.deviceId.toString()).attr('data-target', '#actuatorModalCon');
-                    }
-                }
-                else {
-                    $('#status-' + element.deviceId.toString()).removeClass('text-success').addClass('text-danger');
-                    $('#smallInfo-' + element.deviceId.toString()).empty();
+            fillItems(newMsg);
+            
+        }
+        else if (newMsg.topic == "updateData") {
+            dataMsg = newMsg;
+            fillItems(newMsg);
+        }
+        else if (newMsg.topic == "discoveryData") {
+            dataMsg = newMsg;
+            
+            //delete old items
+            $('#sensorCardArea').empty();
+            $('#actuatorCardArea').empty();
 
-                    if (element.deviceCategory == "sensor") {
-                        $('#card-' + element.deviceId.toString()).attr('data-target', '#sensorModalDiscon').addClass('border-danger');
-                    }
-                    else if (element.deviceCategory == "actuator") {
-                        $('#card-' + element.deviceId.toString()).attr('data-target', '#actuatorModalDiscon').addClass('border-danger');
-                    }
-                }
-            });
+            //generate items
+            var sensorTemplate = generateSensorCardsTemplate(newMsg);
+            $('#sensorCardArea').append(sensorTemplate);
+
+            var actuatorTemplate = generateActuatorCardsTemplate(newMsg);
+            $('#actuatorCardArea').append(actuatorTemplate);
+
+            feather.replace();
+
+            //fill items
+            fillItems(newMsg);
         }
         
     });
@@ -343,10 +339,46 @@ function generateActuatorCardsTemplate(msg) {
     return template;
 }
 
+function fillItems(msg) {
+    msg.settingsInputData.forEach(function(element, index) {
+        $('#img-' + element.deviceId.toString()).attr('src', 'bg/' + element.deviceType + '.png');
+        $('#title-' + element.deviceId.toString()).text(element.deviceType);
+        $('#name-' + element.deviceId.toString()).text(element.dispName);
+        $('#status-' + element.deviceId.toString()).text(element.status.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }));
+        
+        if (element.status == "connected") {
+            if ($('#smallInfo-' + element.deviceId.toString()).children().length == 0) {
+                $('#smallInfo-' + element.deviceId.toString()).append('IP: <span class="text-primary" id="ip-' + element.deviceId + '"></span><br>'
+                                                                    + 'Latest value: <span class="text-primary" id="latest-' + element.deviceId + '"></span>'
+                );
+            }                    
+            $('#ip-' + element.deviceId.toString()).text(element.deviceIp);
+            $('#status-' + element.deviceId.toString()).removeClass('text-danger').addClass('text-success');
+        
+            if (element.deviceCategory == "sensor") {
+                $('#card-' + element.deviceId.toString()).attr('data-target', '#sensorModalCon').removeClass('border-danger');
+                $('#latest-' + element.deviceId.toString()).text(element.lastReceivedVal.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }));
+            }
+            else if (element.deviceCategory == "actuator") {
+                $('#card-' + element.deviceId.toString()).attr('data-target', '#actuatorModalCon').removeClass('border-danger');
+            }
+        }
+        else {
+            $('#status-' + element.deviceId.toString()).removeClass('text-success').addClass('text-danger');
+            $('#smallInfo-' + element.deviceId.toString()).empty();
 
+            if (element.deviceCategory == "sensor") {
+                $('#card-' + element.deviceId.toString()).attr('data-target', '#sensorModalDiscon').addClass('border-danger');
+            }
+            else if (element.deviceCategory == "actuator") {
+                $('#card-' + element.deviceId.toString()).attr('data-target', '#actuatorModalDiscon').addClass('border-danger');
+            }
+        }
+    });
+}
 
 function fillSensorModal(callerId, modalType) {
-    var sensorDataElement = onLoadMsg.settingsInputData.find(x => x.deviceId.toString() === callerId);
+    var sensorDataElement = dataMsg.settingsInputData.find(x => x.deviceId.toString() === callerId);
     
     if (modalType == 'sensorModalCon') {
         $('#sensorId').text(sensorDataElement.deviceId);
@@ -395,7 +427,7 @@ function fillSensorModal(callerId, modalType) {
 }
 
 function fillActuatorModal(callerId, modalType) {
-    var actuatorDataElement = onLoadMsg.settingsInputData.find(x => x.deviceId.toString() === callerId);
+    var actuatorDataElement = dataMsg.settingsInputData.find(x => x.deviceId.toString() === callerId);
     
     if (modalType == 'actuatorModalCon') {
         $('#actuatorId').text(actuatorDataElement.deviceId);
@@ -412,7 +444,9 @@ function fillActuatorModal(callerId, modalType) {
         }
 
         //generate options for all sensors
-        onLoadMsg.settingsInputData.forEach(function(element, index) {
+        $('#selectSensorLink').empty();
+        $('#selectSensorLink').append(new Option('None', '0'));
+        dataMsg.settingsInputData.forEach(function(element, index) {
             if (element.deviceCategory == 'sensor') {
                 $('#selectSensorLink').append(new Option(element.deviceType + ' - ' + element.dispName, element.deviceId.toString()));
             }
@@ -422,7 +456,7 @@ function fillActuatorModal(callerId, modalType) {
             $('#selectSensorLink option[value="0"]').attr('selected', true);
         }
         else {
-            var linkedSensor = onLoadMsg.settingsInputData.find(x => x.deviceId === actuatorDataElement.linkedTo);
+            var linkedSensor = dataMsg.settingsInputData.find(x => x.deviceId === actuatorDataElement.linkedTo);
             $('#selectSensorLink option[value="' + linkedSensor.deviceId + '"]').attr('selected', true);
 
             //generate options for linked sensor
@@ -452,7 +486,9 @@ function fillActuatorModal(callerId, modalType) {
         }
 
         //generate options for all sensors
-        onLoadMsg.settingsInputData.forEach(function(element, index) {
+        $('#selectSensorLinkDiscon').empty();
+        $('#selectSensorLinkDiscon').append(new Option('None', '0'));
+        dataMsg.settingsInputData.forEach(function(element, index) {
             if (element.deviceCategory == 'sensor') {
                 $('#selectSensorLinkDiscon').append(new Option(element.deviceType + ' - ' + element.dispName, element.deviceId.toString()));
             }
@@ -462,7 +498,7 @@ function fillActuatorModal(callerId, modalType) {
             $('#selectSensorLinkDiscon option[value="0"]').attr('selected', true);
         }
         else {
-            var linkedSensor = onLoadMsg.settingsInputData.find(x => x.deviceId === actuatorDataElement.linkedTo);
+            var linkedSensor = dataMsg.settingsInputData.find(x => x.deviceId === actuatorDataElement.linkedTo);
             $('#selectSensorLinkDiscon option[value="' + linkedSensor.deviceId + '"]').attr('selected', true);
 
             //generate options for linked sensor

@@ -114,7 +114,8 @@ $( document ).ready(function() {
             console.log("new charts");
         }
         else if (newMsg.topic == "updateData") {
-            addToLineChart(lineChart, newMsg, '#007bff');
+            //addToLineChart(lineChart, newMsg, '#007bff');
+            fillDashboardWithData(newMsg);
             console.log("add/update");
         }
 
@@ -206,7 +207,8 @@ function generateGridItems(grpId, items) {
 function generateGridItem(grpId, itemId, itemType) {
     var itemOpenTemplate = '<div class="card" id="card-grp-' + grpId + '-item-' + itemId + '">'
                         + '<div class="card-body">'
-                        + '<h6 class="card-title text-uppercase"></h6>';
+                        + '<h6 class="card-title text-uppercase"></h6>'
+                        + '<h6 class="card-subtitle text-muted mb-1"></h6>';
 
     var itemValTemplate = '<h3 class="display-4"></h3>'
                         + '</div>'
@@ -243,20 +245,33 @@ function fillDashboardWithData(msg) {
         }
 
         //fill said ids with data
-        //fill group titles
-        $('#' + groupId).find('.card-header').text(msg.dashboardGroups.find(x => x.htmlId === (element.numberGroup.toString())).name);
+        if (msg.topic == "onLoadData") {
+            //fill group titles
+            $('#' + groupId).find('.card-header').text(msg.dashboardGroups.find(x => x.htmlId === (element.numberGroup.toString())).name);
+        }
+
+        if (element.deviceStatus == "connected") {
+            $('#' + itemId).removeClass('border-danger disabledDiv');
+            colour = '#0275d8';
+        }
+        else if (element.deviceStatus == "disconnected") {
+            $('#' + itemId).addClass('border-danger disabledDiv');
+            colour = '#d9534f';
+        }
         
         //fill item titles and values
         switch (element.measType) {
             case "Hum":
                 if (element.uiType == "val") {
                     $('#' + itemId).find('.card-title').text("Current humidity");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints[0] !== 'undefined') {
                         $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " %");
                     }
                 }
                 else if (element.uiType == "chart") {
                     $('#' + itemId).find('.card-title').text("Humidity history [%]");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints[0] !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
                     }
@@ -265,19 +280,212 @@ function fillDashboardWithData(msg) {
             case "Temp":
                 if (element.uiType == "val") {
                     $('#' + itemId).find('.card-title').text("Current temperature");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints[0] !== 'undefined') {
                         $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " °C");
                     }
                 }
                 else if (element.uiType == "chart") {
                     $('#' + itemId).find('.card-title').text("Temperature history [°C]");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints[0] !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
                     }
                 }
                 break;
-            //add other cases
-        
+            case "Press":
+                if (element.uiType == "val") {
+                    $('#' + itemId).find('.card-title').text("Current pressure");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " Pa");
+                    }
+                }
+                else if (element.uiType == "chart") {
+                    $('#' + itemId).find('.card-title').text("Pressure history [Pa]");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        makeChart(element.DataPoints, canvasId, colour);
+                    }
+                }
+                break;
+            case "Mot":
+                if (element.uiType == "val") {
+                    $('#' + itemId).find('.card-title').text("Current motion status");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " ");
+                    }
+                }
+                else if (element.uiType == "chart") {
+                    $('#' + itemId).find('.card-title').text("Motion history");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        makeChart(element.DataPoints, canvasId, colour);
+                    }
+                }
+                break;
+            case "But":
+                if (element.uiType == "val") {
+                    $('#' + itemId).find('.card-title').text("Current button status");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " ");
+                    }
+                }
+                else if (element.uiType == "chart") {
+                    $('#' + itemId).find('.card-title').text("Button history");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        makeChart(element.DataPoints, canvasId, colour);
+                    }
+                }
+                break;
+            case "Lum":
+                if (element.uiType == "val") {
+                    $('#' + itemId).find('.card-title').text("Current light intensity");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " cd");
+                    }
+                }
+                else if (element.uiType == "chart") {
+                    $('#' + itemId).find('.card-title').text("Light intensity history [cd]");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        makeChart(element.DataPoints, canvasId, colour);
+                    }
+                }
+                break;
+            case "Dist":
+                if (element.uiType == "val") {
+                    $('#' + itemId).find('.card-title').text("Current distance");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " mm");
+                    }
+                }
+                else if (element.uiType == "chart") {
+                    $('#' + itemId).find('.card-title').text("Distance history [mm]");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        makeChart(element.DataPoints, canvasId, colour);
+                    }
+                }
+                break;
+            case "Co2":
+                if (element.uiType == "val") {
+                    $('#' + itemId).find('.card-title').text("Current CO2 value");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " ppm");
+                    }
+                }
+                else if (element.uiType == "chart") {
+                    $('#' + itemId).find('.card-title').text("CO2 history [ppm]");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        makeChart(element.DataPoints, canvasId, colour);
+                    }
+                }
+                break;
+            case "Voc":
+                if (element.uiType == "val") {
+                    $('#' + itemId).find('.card-title').text("Current VOC");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " ppb");
+                    }
+                }
+                else if (element.uiType == "chart") {
+                    $('#' + itemId).find('.card-title').text("VOC history [ppb]");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        makeChart(element.DataPoints, canvasId, colour);
+                    }
+                }
+                break;
+            case "Gyro":
+                if (element.uiType == "val") {
+                    $('#' + itemId).find('.card-title').text("Current Gyro");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " °/s");
+                    }
+                }
+                else if (element.uiType == "chart") {
+                    $('#' + itemId).find('.card-title').text("Gyro history [°/s]");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        makeChart(element.DataPoints, canvasId, colour);
+                    }
+                }
+                break;
+            case "Acc":
+                if (element.uiType == "val") {
+                    $('#' + itemId).find('.card-title').text("Current acceleration");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " m/s²");
+                    }
+                }
+                else if (element.uiType == "chart") {
+                    $('#' + itemId).find('.card-title').text("Acceleration history [m/s²]");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        makeChart(element.DataPoints, canvasId, colour);
+                    }
+                }
+                break;
+            case "Uv":
+                if (element.uiType == "val") {
+                    $('#' + itemId).find('.card-title').text("Current UV index");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " ");
+                    }
+                }
+                else if (element.uiType == "chart") {
+                    $('#' + itemId).find('.card-title').text("UV history");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        makeChart(element.DataPoints, canvasId, colour);
+                    }
+                }
+                break;
+            case "Efi":
+                if (element.uiType == "val") {
+                    $('#' + itemId).find('.card-title').text("Current E-Field");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " V/m");
+                    }
+                }
+                else if (element.uiType == "chart") {
+                    $('#' + itemId).find('.card-title').text("E-Field history [V/m]");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        makeChart(element.DataPoints, canvasId, colour);
+                    }
+                }
+                break;
+            case "Wind":
+                if (element.uiType == "val") {
+                    $('#' + itemId).find('.card-title').text("Current wind speed");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " m/s");
+                    }
+                }
+                else if (element.uiType == "chart") {
+                    $('#' + itemId).find('.card-title').text("Wind speed history [m/s]");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints[0] !== 'undefined') {
+                        makeChart(element.DataPoints, canvasId, colour);
+                    }
+                }
+                break;
+
             default:
                 break;
         }
@@ -315,7 +523,7 @@ function makeChart(dataArray, canvasId, colour) {
     
     //generate displayed time
     $.each(inputTimes, function (indexInArray, valueOfElement) {
-        inputLabels.push(moment.unix(valueOfElement).format(timeFormat));
+        inputLabels.push(moment(valueOfElement).format(timeFormat));
     });
     
     // for testing: moment.unix(1558121936).format(timeFormat) with timeFormat = 'YYYY-MM-DD HH:mm:ss'
