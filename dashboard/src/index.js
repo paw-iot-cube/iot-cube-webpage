@@ -114,7 +114,6 @@ $( document ).ready(function() {
             console.log("new charts");
         }
         else if (newMsg.topic == "updateData") {
-            //addToLineChart(lineChart, newMsg, '#007bff');
             fillDashboardWithData(newMsg);
             console.log("add/update");
         }
@@ -132,15 +131,13 @@ function generateGrid(msg) {
     var template = '';
 
     if (msg.dashboardGroups.length > maxGroupsInRow) {
-        for (let i = 0; i < (msg.dashboardGroups.length); i += 2) {
-            console.log(i);
-
+        for (let i = 0; i < (msg.dashboardGroups.length); i += maxGroupsInRow) {
             template += rowOpenTemplate;
 
             //generate group templates
             template += generateGridGroupWithItems(msg.dashboardGroups[i].htmlId, msg.dashboardGroups[i].items);
             //check if odd number of groups and not last groups to prevent exception in last group
-            if ((msg.dashboardGroups.length % 2) == 0 || i < (msg.dashboardGroups.length - 2)) {
+            if ((msg.dashboardGroups.length % 2) == 0 || i < (msg.dashboardGroups.length - maxGroupsInRow)) {
                 template += generateGridGroupWithItems(msg.dashboardGroups[i+1].htmlId, msg.dashboardGroups[i+1].items);
             }
 
@@ -182,14 +179,25 @@ function generateGridGroupWithItems(grpId, items) {
 
 function generateGridItems(grpId, items) {
     var itemRowTemplate = '<!--ItemRow-->'
-                        + '<div class="card-deck">';
+                        + '<div class="card-deck mb-3">';
 
     var maxItemsInRow = 3;
     var template = '';
     var processedItemsCount = 0;
 
     if (items.length > maxItemsInRow) {
-        // do something different                       <-------------------------  !!
+        for (let i = 0; i < (items.length); i += maxItemsInRow) {
+            template += itemRowTemplate;
+            
+            for (let j = 0; j < maxItemsInRow; j++) {
+                //generate item templates
+                if (items.length > (i+j)) {
+                    template += generateGridItem(grpId, (i + j + 1), items[(i + j)]);
+                }
+            }
+
+            template += '</div>';
+        }
     }
     else {
         template += itemRowTemplate;
