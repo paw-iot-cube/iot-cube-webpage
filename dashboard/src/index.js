@@ -60,6 +60,9 @@
  */
 //'use strict';
 
+var discoveryItems = [];
+var discoveryDone = false;
+
 // When JQuery is ready, update
 $( document ).ready(function() {
     // Turn on debugging for uibuilderfe (default is off)
@@ -90,7 +93,7 @@ $( document ).ready(function() {
     // Note that you can also listen for 'msgsReceived' as they are updated at the same time
     // but newVal relates to the attribute being listened to.
     uibuilder.onChange('msg', function(newMsg) {
-        console.info('indexjs:msg: property msg has changed! ', newMsg);
+        //console.info('indexjs:msg: property msg has changed! ', newMsg);
         //check if msg is data supply on page load or data update
         if (newMsg.topic == "onLoadData" && newMsg.payload == "lastItem") {
             //ensure, every item has data points attached
@@ -108,14 +111,47 @@ $( document ).ready(function() {
             if (!isMissingDataPoints && $('#grid').children().length == 0) {
                 generateGrid(newMsg);
 
+                console.log("onLoad");
                 fillDashboardWithData(newMsg);
-            }
-
-            console.log("new charts");
+            }            
         }
         else if (newMsg.topic == "updateData") {
-            fillDashboardWithData(newMsg);
             console.log("add/update");
+            fillDashboardWithData(newMsg);            
+        }
+        else if (newMsg.topic == "discoveryData") {
+            console.log("discovery");
+
+            if (discoveryDone) {
+                discoveryDone = false;
+                discoveryItems = [];
+            }
+            else {
+
+            }
+
+
+            //check if new group and items needed
+            if ($('#card-grp-' + newMsg.itemData.numberGroup).length == 0) {
+                //check if new group can be put into an existing row or not, based on maxGroupsInRow value (same as in generateGrid function)
+                var maxGroupsInRow = 2;
+                var newGroupId = newMsg.itemData.numberGroup;
+
+                if ((newGroupId % 2) == 0) {
+                    //newGroupId is even, so last already existing id is odd -> if maxGroupsInRow even, then enough space for new group in row
+                    var newGroupTemplate = generateGridGroupWithItems(newGroupId, newMsg.itemList);
+                    $('#grid').children().last().append(newGroupTemplate);
+                }
+                else if ((newGroupId % 2) == 1) {
+                    //newGroupId is odd -> need new row, if maxGroupsInRow is even
+
+                    // TODO                                                                                                 <<--------------------------------  !!!
+                }
+            }
+
+
+            // TODO: fill new items                                                                                         <<--------------------------------  !!!
+
         }
 
         
