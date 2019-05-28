@@ -154,7 +154,7 @@ $( document ).ready(function() {
 
         }
 
-        
+        feather.replace();
     });
     
 }); // --- End of JQuery Ready --- //
@@ -200,6 +200,9 @@ function generateGridGroupWithItems(grpId, items) {
                             + '<div class="card" id="card-grp-' + grpId + '">'
                             + '<div class="card-header">'
                             + '<span></span>'
+                            + '<button type="button" class="btn ml-1" data-toggle="modal" data-target="#editModal">'
+                            + '<i data-feather="edit-3"></i>'
+                            + '</button>'
                             + '</div>'
                             + '<div class="card-body">';
 
@@ -249,7 +252,7 @@ function generateGridItems(grpId, items) {
 }
 
 function generateGridItem(grpId, itemId, itemType) {
-    var itemOpenTemplate = '<div class="card" id="card-grp-' + grpId + '-item-' + itemId + '">'
+    var itemOpenTemplate = '<div class="card draggable" id="card-grp-' + grpId + '-item-' + itemId + '" draggable="true" ondragstart="drag(event)">'
                         + '<div class="card-body">'
                         + '<h6 class="card-title text-uppercase"></h6>'
                         + '<h6 class="card-subtitle text-muted mb-1"></h6>';
@@ -271,6 +274,8 @@ function generateGridItem(grpId, itemId, itemType) {
         template += itemChartTemplate;
     }
 
+    template += '<div class="dropzone rounded" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="clearDrop(event)"> &nbsp; </div>';
+
     return template;
 }
 
@@ -291,7 +296,7 @@ function fillDashboardWithData(msg) {
         //fill said ids with data
         if (msg.topic == "onLoadData") {
             //fill group titles
-            $('#' + groupId).find('.card-header').text(msg.dashboardGroups.find(x => x.htmlId === (element.numberGroup.toString())).name);
+            $('#' + groupId).find('.card-header span').text(msg.dashboardGroups.find(x => x.htmlId === (element.numberGroup.toString())).name);
         }
 
         if (element.deviceStatus == "connected") {
@@ -602,34 +607,78 @@ function makeChart(dataArray, canvasId, colour) {
     }
 }
 
-function addToLineChart(chart, msgObject, colour) {
-    var inputTimes = msgObject.chart.times;
-    var inputData = msgObject.chart.data;
-    var inputLabels = [];
 
-    console.log(inputData);
-    
-    var timeFormat =  'HH:mm:ss';
-    
-    //generate displayed time
-    $.each(inputTimes, function (indexInArray, valueOfElement) {
-        inputLabels.push(moment.unix(valueOfElement).format(timeFormat));
-    });
-    
-    console.log(chart.data.labels);
-    
-    chart.data.labels = [];
-    inputLabels.forEach((label) => {
-        chart.data.labels.push(label);
-    });
-    chart.data.datasets.pop();
-    chart.data.datasets.push({
-            label: inputLabels,
-            data: inputData,
-            borderColor: colour,
-            borderWidth: 4,
-            pointBackgroundColor: colour
-    });
 
-    chart.update();
+//----------------------------------------
+//              drag and drop
+//----------------------------------------
+
+const drag = (event) => {
+    event.dataTransfer.setData("text/plain", event.target.id);
 }
+  
+const allowDrop = (ev) => {
+    ev.preventDefault();
+    if (hasClass(ev.target,"dropzone")) {
+        addNewClass(ev.target,"droppable");
+    }
+}
+
+const clearDrop = (ev) => {
+    removeAClass(ev.target,"droppable");
+}
+
+const drop = (event) => {
+    event.preventDefault();
+    const data = event.dataTransfer.getData("text/plain");
+    const element = document.querySelector(`#${data}`);
+    try {
+        // remove the spacer content from dropzone
+        event.target.removeChild(event.target.firstChild);
+        // add the draggable content
+        event.target.appendChild(element);
+        // remove the dropzone parent
+        unwrap(event.target);
+    } catch (error) {
+        console.warn("can't move the item to the same place")
+    }
+    updateDropzones();
+}
+
+const updateDropzones = () => {
+    /* after dropping, refresh the drop target areas
+    so there is a dropzone after each item
+    using jQuery here for simplicity */
+    
+    var dz = $('<div class="dropzone rounded" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="clearDrop(event)"> &nbsp; </div>');
+    
+    // delete old dropzones
+    $('.dropzone').remove();
+
+    // insert new dropdzone after each item   
+    dz.insertAfter('.card.draggable');
+    
+    // insert new dropzone in any empty swimlanes
+    $(".items:not(:has(.card.draggable))").append(dz);
+};
+
+// helpers
+function hasClass(target, className) {
+    return new RegExp('(\\s|^)' + className + '(\\s|$)').test(target.className);
+}
+
+function addNewClass(element, clss) {
+    if (!hasClass(element,clss)) element.className += " " + clss;
+}
+
+function removeAClass(element,clss) {
+    if (hasClass(element,clss)) {
+        var reg = new RegExp('(\\s|^)' + clss + '(\\s|$)');
+        element.className = element.className.replace(reg, ' ');
+    }
+}
+
+function unwrap(node) {
+    node.replaceWith(...node.childNodes);
+}
+  

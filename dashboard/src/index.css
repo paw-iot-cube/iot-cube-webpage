@@ -73,6 +73,17 @@ body {
 }
 
 .disabledDiv {
-    pointer-events: none;
+    /*pointer-events: none;*/
     opacity: 0.6;
+}
+
+.card.draggable {
+    margin-bottom: 1rem;
+    cursor: grab;
+}
+
+.droppable {
+    background-color: var(--primary);
+    min-width: 50px;
+    margin-bottom: 1rem;
 }
