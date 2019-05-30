@@ -60,8 +60,7 @@
  */
 //'use strict';
 
-var discoveryItems = [];
-var discoveryDone = false;
+var dataMsg;
 
 // When JQuery is ready, update
 $( document ).ready(function() {
@@ -109,6 +108,7 @@ $( document ).ready(function() {
             }
 
             if (!isMissingDataPoints && $('#grid').children().length == 0) {
+                dataMsg = newMsg;
                 generateGrid(newMsg);
 
                 console.log("onLoad");
@@ -117,19 +117,13 @@ $( document ).ready(function() {
         }
         else if (newMsg.topic == "updateData") {
             console.log("add/update");
+            dataMsg = newMsg;
             fillDashboardWithData(newMsg);            
         }
         else if (newMsg.topic == "discoveryData") {
             console.log("discovery");
 
-            if (discoveryDone) {
-                discoveryDone = false;
-                discoveryItems = [];
-            }
-            else {
-
-            }
-
+            dataMsg = newMsg;
 
             //check if new group and items needed
             if ($('#card-grp-' + newMsg.itemData.numberGroup).length == 0) {
@@ -144,13 +138,19 @@ $( document ).ready(function() {
                 }
                 else if ((newGroupId % 2) == 1) {
                     //newGroupId is odd -> need new row, if maxGroupsInRow is even
+                    var rowOpenTemplate = '<!--Row-->'
+                                        + '<div class="card-deck mt-3">';
+                    var newGroupTemplate = generateGridGroupWithItems(newGroupId, newMsg.itemList);
 
-                    // TODO                                                                                                 <<--------------------------------  !!!
+                    var template = rowOpenTemplate;
+                    template += newGroupTemplate;
+                    template += '</div>';
+                    
+                    $('#grid').last().append(template);
                 }
             }
 
-
-            // TODO: fill new items                                                                                         <<--------------------------------  !!!
+            fillDashboardWithData(newMsg);
 
         }
 
@@ -158,6 +158,39 @@ $( document ).ready(function() {
     });
     
 }); // --- End of JQuery Ready --- //
+
+var modalEditCaller;
+
+$(document).on('shown.bs.modal', '#editModal', function(event) {
+    //get element that triggered the modal
+    var triggerElement = $(event.relatedTarget);
+    
+    console.log($(triggerElement[0]).parent().parent().attr('id'));
+    //save caller id
+    modalEditCaller = $(triggerElement[0]).parent().parent().attr('id');
+
+    fillEditModal($(triggerElement[0]).parent().parent().attr('id').replace('card-grp-', ''));
+});
+
+$('#formEditGroup').on('submit', function(event) {
+    event.preventDefault();
+
+    
+
+    var collection = {
+        'htmlId': $('#spanGroupNum').text(),
+        'name': $('#inputGroupName').val()
+    };
+
+    uibuilder.send({
+        'topic': 'groupNameEdit',
+        'payload': collection
+    });
+
+    $('#card-grp-' + $('#spanGroupNum').text()).find('.card-header span').text($('#inputGroupName').val());
+
+    $('#editModal').modal('hide');
+});
 
 
 function generateGrid(msg) {
@@ -314,14 +347,14 @@ function fillDashboardWithData(msg) {
                 if (element.uiType == "val") {
                     $('#' + itemId).find('.card-title').text("Current humidity");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
                         $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " %");
                     }
                 }
                 else if (element.uiType == "chart") {
                     $('#' + itemId).find('.card-title').text("Humidity history [%]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
                     }
                 }
@@ -330,14 +363,14 @@ function fillDashboardWithData(msg) {
                 if (element.uiType == "val") {
                     $('#' + itemId).find('.card-title').text("Current temperature");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
                         $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " °C");
                     }
                 }
                 else if (element.uiType == "chart") {
                     $('#' + itemId).find('.card-title').text("Temperature history [°C]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
                     }
                 }
@@ -346,14 +379,14 @@ function fillDashboardWithData(msg) {
                 if (element.uiType == "val") {
                     $('#' + itemId).find('.card-title').text("Current pressure");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
                         $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " Pa");
                     }
                 }
                 else if (element.uiType == "chart") {
                     $('#' + itemId).find('.card-title').text("Pressure history [Pa]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
                     }
                 }
@@ -362,14 +395,14 @@ function fillDashboardWithData(msg) {
                 if (element.uiType == "val") {
                     $('#' + itemId).find('.card-title').text("Current motion status");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
                         $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " ");
                     }
                 }
                 else if (element.uiType == "chart") {
                     $('#' + itemId).find('.card-title').text("Motion history");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
                     }
                 }
@@ -378,14 +411,14 @@ function fillDashboardWithData(msg) {
                 if (element.uiType == "val") {
                     $('#' + itemId).find('.card-title').text("Current button status");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
                         $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " ");
                     }
                 }
                 else if (element.uiType == "chart") {
                     $('#' + itemId).find('.card-title').text("Button history");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
                     }
                 }
@@ -394,14 +427,14 @@ function fillDashboardWithData(msg) {
                 if (element.uiType == "val") {
                     $('#' + itemId).find('.card-title').text("Current light intensity");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
                         $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " cd");
                     }
                 }
                 else if (element.uiType == "chart") {
                     $('#' + itemId).find('.card-title').text("Light intensity history [cd]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
                     }
                 }
@@ -410,14 +443,14 @@ function fillDashboardWithData(msg) {
                 if (element.uiType == "val") {
                     $('#' + itemId).find('.card-title').text("Current distance");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
                         $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " mm");
                     }
                 }
                 else if (element.uiType == "chart") {
                     $('#' + itemId).find('.card-title').text("Distance history [mm]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
                     }
                 }
@@ -426,14 +459,14 @@ function fillDashboardWithData(msg) {
                 if (element.uiType == "val") {
                     $('#' + itemId).find('.card-title').text("Current CO2 value");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
                         $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " ppm");
                     }
                 }
                 else if (element.uiType == "chart") {
                     $('#' + itemId).find('.card-title').text("CO2 history [ppm]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
                     }
                 }
@@ -442,14 +475,14 @@ function fillDashboardWithData(msg) {
                 if (element.uiType == "val") {
                     $('#' + itemId).find('.card-title').text("Current VOC");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
                         $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " ppb");
                     }
                 }
                 else if (element.uiType == "chart") {
                     $('#' + itemId).find('.card-title').text("VOC history [ppb]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
                     }
                 }
@@ -458,14 +491,14 @@ function fillDashboardWithData(msg) {
                 if (element.uiType == "val") {
                     $('#' + itemId).find('.card-title').text("Current Gyro");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
                         $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " °/s");
                     }
                 }
                 else if (element.uiType == "chart") {
                     $('#' + itemId).find('.card-title').text("Gyro history [°/s]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
                     }
                 }
@@ -474,14 +507,14 @@ function fillDashboardWithData(msg) {
                 if (element.uiType == "val") {
                     $('#' + itemId).find('.card-title').text("Current acceleration");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
                         $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " m/s²");
                     }
                 }
                 else if (element.uiType == "chart") {
                     $('#' + itemId).find('.card-title').text("Acceleration history [m/s²]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
                     }
                 }
@@ -490,14 +523,14 @@ function fillDashboardWithData(msg) {
                 if (element.uiType == "val") {
                     $('#' + itemId).find('.card-title').text("Current UV index");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
                         $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " ");
                     }
                 }
                 else if (element.uiType == "chart") {
                     $('#' + itemId).find('.card-title').text("UV history");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
                     }
                 }
@@ -506,14 +539,14 @@ function fillDashboardWithData(msg) {
                 if (element.uiType == "val") {
                     $('#' + itemId).find('.card-title').text("Current E-Field");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
                         $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " V/m");
                     }
                 }
                 else if (element.uiType == "chart") {
                     $('#' + itemId).find('.card-title').text("E-Field history [V/m]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
                     }
                 }
@@ -522,14 +555,14 @@ function fillDashboardWithData(msg) {
                 if (element.uiType == "val") {
                     $('#' + itemId).find('.card-title').text("Current wind speed");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
                         $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " m/s");
                     }
                 }
                 else if (element.uiType == "chart") {
                     $('#' + itemId).find('.card-title').text("Wind speed history [m/s]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
-                    if (typeof element.DataPoints[0] !== 'undefined') {
+                    if (typeof element.DataPoints !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
                     }
                 }
@@ -542,7 +575,12 @@ function fillDashboardWithData(msg) {
     });
 }
 
-
+function fillEditModal(callerId) {
+    var dataElement = dataMsg.dashboardGroups.find(x => x.htmlId.toString() === callerId);
+    
+    $('#spanGroupNum').text(dataElement.htmlId);
+    $('#inputGroupName').val(dataElement.name);
+}
 
 
 var lineChart;
@@ -632,24 +670,52 @@ const drop = (event) => {
     event.preventDefault();
     const data = event.dataTransfer.getData("text/plain");
     const element = document.querySelector(`#${data}`);
-    try {
+    //try {
         // remove the spacer content from dropzone
         event.target.removeChild(event.target.firstChild);
         // add the draggable content
         event.target.appendChild(element);
         // remove the dropzone parent
         unwrap(event.target);
-    } catch (error) {
+
+        // send moved item information back to Node-Red
+        var prevCardId = $('#'+data).prev('.card').attr('id');
+        if ($('#'+data).next('.card').length > 0) {
+            var nextCardId = $('#'+data).next('.card').attr('id');
+        }
+        else {
+            var nextCardId = '';
+        }
+
+        var items = [];
+
+        $('.card.draggable').each(function() {
+            items.push(this.id);
+            if ($(this).nextAll().length < 2) {
+                items.push($(this).parent().parent().parent().attr('id'));
+                console.log($(this).parent().parent().parent());
+            }
+            
+        });
+
+        uibuilder.send({
+            'topic': 'itemPositionEdit',
+            'prevCardId': prevCardId,
+            'nextCardId': nextCardId,
+            'movedItemId': data,
+            'items': items
+        });
+
+
+    /*} catch (error) {
         console.warn("can't move the item to the same place")
-    }
+    }*/
     updateDropzones();
 }
 
 const updateDropzones = () => {
     /* after dropping, refresh the drop target areas
-    so there is a dropzone after each item
-    using jQuery here for simplicity */
-    
+    so there is a dropzone after each item */    
     var dz = $('<div class="dropzone rounded" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="clearDrop(event)"> &nbsp; </div>');
     
     // delete old dropzones

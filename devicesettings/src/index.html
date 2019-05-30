@@ -58,13 +58,13 @@
                 </a>
                 <a href="/deviceoverview" class="list-group-item list-group-item-action bg-light">
                     <i data-feather="list"></i>
-                    Devices Overview
+                    Device Overview
                 </a>
                 <a href="/devicesettings" class="list-group-item list-group-item-action active">
                     <i data-feather="settings"></i>
-                    Devices Settings
+                    Device Settings
                 </a>
-                <a href="#" class="list-group-item list-group-item-action bg-light">
+                <a href="/mqttinfo" class="list-group-item list-group-item-action bg-light">
                     <i data-feather="send"></i>
                     MQTT Information
                 </a>
@@ -98,7 +98,7 @@
                             <p class="text-body">
                                 Sensor ID: <span class="text-primary" id="sensorId">100100200</span><br>
                                 Sensor IP: <span class="text-primary" id="sensorIp">192.168.1.11</span><br>
-                                Sensor type: <span class="text-primary" id="sensorType">DHT 11</span> <span class="text-primary" id="sensorMeasures">(measures: Temperature, Humidity)</span><br>
+                                Sensor type: <span class="text-primary" id="sensorType">DHT 11</span><br>
                                 Sensor status: <span class="text-success" id="sensorConn">Connected</span><br>
                             </p>
                             <hr>
@@ -134,7 +134,8 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="selectUnit"><i data-feather="percent"></i> Measurement unit</label>
-                                    <select class="form-control" id="selectUnit">
+                                    <select class="form-control" id="selectUnit" disabled>
+                                        <option>Default</option>
                                         <option value="celsius + percent">°C + %</option>
                                         <option value="fahrenheit + percent">°F + %</option>
                                         <option value="kelvin + percent">K + %</option>
@@ -145,13 +146,13 @@
                             <hr>
                             <!--CSV output-->
                             <p class="text-body"><i data-feather="file"></i> Request saved data:</p>
-                            <div class="btn-group btn-block">
-                                <button type="button" class="btn btn-primary" id="btnCSVTemp">1a. Temperature CSV</button>
-                                <button type="button" class="btn btn-primary" id="btnCSVHum">1b. Humidity CSV</button>
-                            </div>
-                            <a class="btn btn-primary btn-block mt-1 disabled" href="data.zip" download="data.zip">2. Download</a>
+                            <button class="btn btn-primary btn-block" id="btnGenerateCSV">1. Generate CSV</button>
+                            <a class="btn btn-primary btn-block mt-1 disabled" href="data.zip" download="data.zip" id="btnDownload">2. Download</a>
                         </div>
                         <div class="modal-footer">
+                            <button type="button" class="btn btn-danger mr-auto" data-toggle="confirmation" 
+                                    data-title="Do you want to remove the device and all its logged data?" data-btn-ok-class="btn-danger"
+                                    id="btnSensorDelete">Remove device</button>
                             <button type="submit" class="btn btn-primary" form="formSensor" id="btnSensorSave">Save changes</button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                         </div>
@@ -173,7 +174,7 @@
                             <p class="text-body">
                                 Sensor ID: <span class="text-primary" id="sensorIdDiscon"></span><br>
                                 Sensor IP: <span class="text-primary" id="sensorIpDiscon"></span><br>
-                                Sensor type: <span class="text-primary" id="sensorTypeDiscon"></span> <span class="text-primary" id="sensorMeasuresDiscon">(measures: Temperature, Humidity)</span><br>
+                                Sensor type: <span class="text-primary" id="sensorTypeDiscon"></span><br>
                                 Sensor status: <span class="text-danger" id="sensorConnDiscon"></span><br>
                             </p>
                             <hr>
@@ -209,7 +210,8 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="selectUnitDiscon"><i data-feather="percent"></i> Measurement unit</label>
-                                    <select class="form-control" id="selectUnitDiscon">
+                                    <select class="form-control" id="selectUnitDiscon" disabled>
+                                        <option>Default</option>
                                         <option>°C + %</option>
                                         <option>°F + %</option>
                                         <option>K + %</option>
@@ -220,13 +222,13 @@
                             <hr>
                             <!--CSV output-->
                             <p class="text-body"><i data-feather="file"></i> Request saved data:</p>
-                            <div class="btn-group btn-block">
-                                <button type="button" class="btn btn-primary" id="btnCSVTempDiscon">1a. Temperature CSV</button>
-                                <button type="button" class="btn btn-primary" id="btnCSVHumDiscon">1b. Humidity CSV</button>
-                            </div>
-                            <a class="btn btn-primary btn-block mt-1 disabled" href="data.zip" download="data.zip">2. Download</a>
+                            <button class="btn btn-primary btn-block" id="btnGenerateCSVDiscon">1. Generate CSV</button>
+                            <a class="btn btn-primary btn-block mt-1 disabled" href="data.zip" download="data.zip" id="btnDownloadDiscon">2. Download</a>
                         </div>
                         <div class="modal-footer">
+                            <button type="button" class="btn btn-danger mr-auto" data-toggle="confirmation" 
+                                    data-title="Do you want to remove the device and all its logged data?" data-btn-ok-class="btn-danger"
+                                    id="btnSensorDeleteDiscon">Remove device</button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                         </div>
                     </div>
@@ -292,6 +294,9 @@
                             </form>
                         </div>
                         <div class="modal-footer">
+                            <button type="button" class="btn btn-danger mr-auto" data-toggle="confirmation" 
+                                    data-title="Do you want to remove the device and all its logged data?" data-btn-ok-class="btn-danger"
+                                    id="btnActuatorDelete">Remove device</button>
                             <button type="submit" class="btn btn-primary" form="formActuator" id="btnActuatorSave">Save changes</button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                         </div>
@@ -358,6 +363,9 @@
                             </form>
                         </div>
                         <div class="modal-footer">
+                            <button type="button" class="btn btn-danger mr-auto" data-toggle="confirmation" 
+                                    data-title="Do you want to remove the device and all its logged data?" data-btn-ok-class="btn-danger"
+                                    id="btnActuatorDeleteDiscon">Remove device</button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                         </div>
                     </div>
@@ -390,24 +398,9 @@
 
                                 </div>
                             </div>
-                        </div>
-                        <div class="card mb-3">
-                            <div class="card-header">
-                                <span>Add Tasmota device (experimental)</span>
-                            </div>
-                            <div class="card-body">
-                                <div class="alert alert-warning">
-                                    Due to the way Tasmota works differently to our own firmware, you can add a Tasmota device and view its current value, but cannot change any settings!
-                                </div>
-                                
-                                <!--todo: form to add Tasmota devices-->
-                            </div>
-                        </div>
+                        </div>                        
                     </div>
-
                 </div>
-
-
             </div>
         </div>
     </div>
@@ -426,6 +419,7 @@
     <script src="./uibuilderfe.min.js"></script>
     <script src="cdn-fallback/popper.min.js"></script>
     <script src="cdn-fallback/bootstrap.min.js"></script>
+    <script src="cdn-fallback/bootstrap-confirmation.min.js"></script>
     <script src="cdn-fallback/feather.min.js"></script>
     <script src="cdn-fallback/Chart.js"></script>
     <script src="cdn-fallback/moment.js"></script>

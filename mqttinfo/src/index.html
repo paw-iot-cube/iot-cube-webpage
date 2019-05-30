@@ -32,7 +32,7 @@
         <link rel="apple-touch-icon" sizes="192x192" href="/images/manifest/icon-192x192.png">
       -->
 
-    <title>Device Overview | PAW IOT-Cube</title>
+    <title>MQTT Information | PAW IOT-Cube</title>
     <meta name="description" content="Home of the PAW IoT-Cube">
 
     <link rel="icon" href="./images/node-blue.ico">
@@ -56,7 +56,7 @@
                     <i data-feather="home"></i>
                     Dashboard
                 </a>
-                <a href="/deviceoverview" class="list-group-item list-group-item-action active">
+                <a href="/deviceoverview" class="list-group-item list-group-item-action bg-light">
                     <i data-feather="list"></i>
                     Device Overview
                 </a>
@@ -64,7 +64,7 @@
                     <i data-feather="settings"></i>
                     Device Settings
                 </a>
-                <a href="/mqttinfo" class="list-group-item list-group-item-action bg-light">
+                <a href="/mqttinfo" class="list-group-item list-group-item-action active">
                     <i data-feather="send"></i>
                     MQTT Information
                 </a>
@@ -85,20 +85,15 @@
 
             <div class="container-fluid">
                 <div class="col main mt-3">
-                    <h1 class="display-4">Device Overview</h1>
+                    <h1 class="display-4">MQTT Information</h1>
 
                     <div class="mb-3">
                         <table class="table table-hover table-responsive-md">
                             <thead>
                                 <tr>
                                     <th scope="col">#</th>
-                                    <th scope="col">Device ID</th>
-                                    <th scope="col">Device IP</th>
-                                    <th scope="col">Display Name</th>
-                                    <th scope="col">Device Category</th>
-                                    <th scope="col">Device Type</th>                                    
-                                    <th scope="col">Visible On Dashbard</th>
-                                    <th scope="col">Status</th>
+                                    <th scope="col">MQTT Topic</th>
+                                    <th scope="col">Device using this topic</th>
                                 </tr>
                             </thead>
                             <tbody id="mainTableBody">

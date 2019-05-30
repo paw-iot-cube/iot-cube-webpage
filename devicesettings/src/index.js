@@ -78,6 +78,13 @@ $( document ).ready(function() {
     // Turn on debugging for uibuilderfe (default is off)
     uibuilder.debug(true);  
 
+    $('[data-toggle=confirmation]').confirmation({
+        rootSelector: '[data-toggle=confirmation]'
+        
+    });
+
+
+
     // If Socket.IO connects/disconnects
     uibuilder.onChange('ioConnected', function(newVal){
         console.info('indexjs:ioConnected: Socket.IO Connection Status Changed: ', newVal);
@@ -212,6 +219,11 @@ $('#formSensor').on('submit', function(event) {
         'payload': collection
     });
 
+    uibuilder.sendCtrl({
+        'uibuilderCtrl': 'ready for content',
+        'changedSettings': true
+    });
+
     $('#sensorModalCon').modal('hide');
 });
 
@@ -240,6 +252,11 @@ $('#formActuator').on('submit', function(event) {
         'payload': collection
     });
 
+    uibuilder.sendCtrl({
+        'uibuilderCtrl': 'ready for content',
+        'changedSettings': true
+    });
+
     $('#actuatorModalCon').modal('hide');
 });
 
@@ -264,6 +281,13 @@ $('input:radio[name=radioManual]').change(function() {
         });
     }
 });
+
+//handle device removal when confirmed
+$(document).on('confirmed.bs.confirmation', function(event) {
+    var triggerElementId = $(event.target).attr('id');
+    
+    removeDevice(triggerElementId);
+})
 
 function generateSensorCardsTemplate(msg) {
     var colOpenTemplate = '<div class="col-auto mb-3">';
@@ -383,8 +407,7 @@ function fillSensorModal(callerId, modalType) {
     if (modalType == 'sensorModalCon') {
         $('#sensorId').text(sensorDataElement.deviceId);
         $('#sensorIp').text(sensorDataElement.deviceIp);
-        $('#sensorType').text(sensorDataElement.deviceType);        
-        //$('#sensorMeasures').text();                              // TODO (needs editing to show measurements)    <<--------------------------------  !!
+        $('#sensorType').text(sensorDataElement.deviceType);
         $('#sensorConn').text(sensorDataElement.status.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }));
 
         $('#inputName').val(sensorDataElement.dispName);
@@ -399,14 +422,11 @@ function fillSensorModal(callerId, modalType) {
         $('#inputInterval').val(sensorDataElement.interval);
         
         // TODO  unit matching type                                                                <<--------------------------------  !!
-
-        // TODO  buttons matching sensor type                                                                <<--------------------------------  !!
     }
     else if (modalType == 'sensorModalDiscon') {
         $('#sensorIdDiscon').text(sensorDataElement.deviceId);
         $('#sensorIpDiscon').text(sensorDataElement.deviceIp);
-        $('#sensorTypeDiscon').text(sensorDataElement.deviceType);        
-        //$('#sensorMeasuresDiscon').text();                              // TODO (needs editing to show measurements)    <<--------------------------------  !!
+        $('#sensorTypeDiscon').text(sensorDataElement.deviceType);
         $('#sensorConnDiscon').text(sensorDataElement.status.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }));
 
         $('#inputNameDiscon').val(sensorDataElement.dispName);
@@ -421,8 +441,6 @@ function fillSensorModal(callerId, modalType) {
         $('#inputIntervalDiscon').val(sensorDataElement.interval);
         
         // TODO  unit matching type                                                                <<--------------------------------  !!
-
-        // TODO  buttons matching sensor type                                                                <<--------------------------------  !!
     }
 }
 
@@ -516,7 +534,7 @@ function fillActuatorModal(callerId, modalType) {
 function addOptionsSelectMeasurand(id, deviceType) {
     $(id).empty();
     switch (deviceType) {
-        case "DHT11":
+        case "DHT22":
             $(id).append(new Option("Temperature", "T"));
             $(id).append(new Option("Humidity", "H"));
             break;
@@ -548,4 +566,43 @@ function addOptionsSelectMeasurand(id, deviceType) {
         default:
             break;
     }
+}
+
+
+function removeDevice(caller) {
+    var idToRemove = '0';
+    switch(caller) {
+        case 'btnSensorDelete':
+            idToRemove = modalSensorConCaller.split('-')[1];
+            $(modalSensorConCaller).parent().remove();
+            $('#sensorModalCon').modal('hide');
+            break;
+        case 'btnSensorDeleteDiscon':
+            idToRemove = modalSensorDisconCaller.split('-')[1];
+            $(modalActuatorDisconCaller).parent().remove();
+            $('#sensorModalDiscon').modal('hide');
+            break;
+        case 'btnActuatorDelete':
+            idToRemove = modalActuatorConCaller.split('-')[1];
+            $(modalActuatorConCaller).parent().remove();
+            $('#actuatorModalCon').modal('hide');
+            break;
+        case 'btnActuatorDeleteDiscon':
+            idToRemove = modalActuatorDisconCaller.split('-')[1];
+            $(modalActuatorDisconCaller).parent().remove();
+            $('#actuatorModalDiscon').modal('hide');
+            break;
+        default:
+            break;
+    }
+
+    uibuilder.send({
+        'topic': 'removeDevice',
+        'payload': idToRemove
+    });
+
+    uibuilder.sendCtrl({
+        'uibuilderCtrl': 'ready for content',
+        'removedDevice': true
+    });
 }
