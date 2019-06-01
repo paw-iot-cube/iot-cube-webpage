@@ -78,6 +78,7 @@ $( document ).ready(function() {
     // Turn on debugging for uibuilderfe (default is off)
     uibuilder.debug(true);  
 
+    // initialise confirmation plugin
     $('[data-toggle=confirmation]').confirmation({
         rootSelector: '[data-toggle=confirmation]'
         
@@ -287,7 +288,7 @@ $(document).on('confirmed.bs.confirmation', function(event) {
     var triggerElementId = $(event.target).attr('id');
     
     removeDevice(triggerElementId);
-})
+});
 
 function generateSensorCardsTemplate(msg) {
     var colOpenTemplate = '<div class="col-auto mb-3">';
@@ -549,9 +550,6 @@ function addOptionsSelectMeasurand(id, deviceType) {
         case "BUTTON":
             $(id).append(new Option("Button push", "B"));
             break;
-        case "TSL2561":
-            $(id).append(new Option("Light intensity", "L"));
-            break;
         case "HCSR04":
             $(id).append(new Option("Distance", "D"));
             break;
@@ -562,7 +560,40 @@ function addOptionsSelectMeasurand(id, deviceType) {
         case "MAX44009":
             $(id).append(new Option("Light intensity", "L"));
             break;
-        // TODO: insert rest of sensors                                                 <<------------------------------ !!
+        case "BMP280":
+            $(id).append(new Option("Temperature", "T"));
+            $(id).append(new Option("Humidity", "H"));
+            $(id).append(new Option("Pressure", "P"));
+            $(id).append(new Option("VOC", "V"));
+            break;
+        case "MPR121":
+            $(id).append(new Option("E-field", "E"));
+            break;
+        case "MPU6050":
+            $(id).append(new Option("Gyro", "G"));
+            $(id).append(new Option("Acceleration", "A"));
+            break;
+        case "SI1145":
+            $(id).append(new Option("UV", "U"));
+            break;
+        case "TSL2561":
+            $(id).append(new Option("Light intensity", "L"));
+            break;
+        case "TX20":
+            $(id).append(new Option("Wind speed", "W"));
+            break;
+        case "VEML6070":
+            $(id).append(new Option("UV", "U"));
+            break;
+        case "ANALOG":
+            $(id).append(new Option("Voltage", "O"));
+            break;
+        case "BLUEDOT":
+            $(id).append(new Option("Temperature", "T"));
+            $(id).append(new Option("Humidity", "H"));
+            $(id).append(new Option("Pressure", "P"));
+            $(id).append(new Option("Light intensity", "L"));
+            break;
         default:
             break;
     }

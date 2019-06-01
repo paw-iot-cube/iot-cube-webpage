@@ -118,11 +118,24 @@ $( document ).ready(function() {
 }) // --- End of JQuery Ready --- //
 
 function fillTable(msg) {
-    msg.mqttData.forEach(function(element, index) {
-        var trOpenTemplate = '<tr>';
-        
+    var trOpenTemplate = '<tr>';
+
+    var discoveryTemplate = trOpenTemplate
+                            + '<th scope="row">' + 1 + '</th>'
+                            + '<td>' + 'discovery/device' + '</td>'
+                            + '<td class="font-italic">' + 'Any device on startup' + '</td>'
+                            + '</tr>'
+                            + trOpenTemplate
+                            + '<th scope="row">' + 2 + '</th>'
+                            + '<td>' + 'discovery/master' + '</td>'
+                            + '<td class="font-italic">' + 'Node-Red' + '</td>'
+                            + '</tr>';
+
+    $('#mainTableBody').append(discoveryTemplate);
+
+    msg.mqttData.forEach(function(element, index) {        
         var tableDataTemplate = trOpenTemplate
-                                + '<th scope="row">' + (index+1) + '</th>'
+                                + '<th scope="row">' + (index+3) + '</th>'
                                 + '<td>' + element.mqttTopic + '</td>'
                                 + '<td>' + element.name + '</td>'
                                 + '</tr>';

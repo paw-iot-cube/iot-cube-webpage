@@ -67,11 +67,11 @@ $( document ).ready(function() {
     // Turn on debugging for uibuilderfe (default is off)
     uibuilder.debug(true);
 
-    // You can get attributes manually. Non-existent attributes return 'undefined'
-    //console.dir(uibuilder.get('msg'))
-
-    // You can also set things manually. See the list of attributes top of page.
-    // You can add arbitrary attributes to the object, you cannot overwrite internal attributes
+    // initialise confirmation plugin
+    $('[data-toggle=confirmation]').confirmation({
+        rootSelector: '[data-toggle=confirmation]'
+        
+    });
 
     // If Socket.IO connects/disconnects
     uibuilder.onChange('ioConnected', function(newVal){
@@ -107,8 +107,17 @@ $( document ).ready(function() {
                 isMissingDataPoints = true;
             }
 
-            if (!isMissingDataPoints && $('#grid').children().length == 0) {
+            if (!isMissingDataPoints) { //&& $('#grid').children().length == 0) {           
+                $('#grid').empty();     
+                //sort groups to match htmlid sequence
+                newMsg.dashboardGroups.sort(function(a, b) {
+                    var a1 = a.htmlId, b1 = b.htmlId;
+                    if (a1 == b1) return 0;
+                    return a1 > b1 ? 1: -1;
+                });
+
                 dataMsg = newMsg;
+
                 generateGrid(newMsg);
 
                 console.log("onLoad");
@@ -150,6 +159,8 @@ $( document ).ready(function() {
                 }
             }
 
+            newMsg.dashboardData = [];
+            newMsg.dashboardData.push(newMsg.itemData);
             fillDashboardWithData(newMsg);
 
         }
@@ -192,6 +203,30 @@ $('#formEditGroup').on('submit', function(event) {
     $('#editModal').modal('hide');
 });
 
+//handle group removal when confirmed
+$(document).on('confirmed.bs.confirmation', function(event) {
+    var triggerGroupId = $(event.target).parent().parent().attr('id');
+    
+    removeGroupAndItems(triggerGroupId);
+});
+
+function removeGroupAndItems(groupId) {
+    var itemIdsInGroup = [];
+    
+    //get all items in this group
+    $('.card', $('#' + groupId)).each(function() {
+        itemIdsInGroup.push($(this).attr('id').split('-')[4]);
+    });
+
+    var collection = {
+        'topic': 'removeGroupAndItems',
+        'items' : itemIdsInGroup,
+        'group' : groupId.split('-')[2]
+    };
+
+    uibuilder.send(collection);
+}
+
 
 function generateGrid(msg) {
     var maxGroupsInRow = 2;
@@ -226,6 +261,12 @@ function generateGrid(msg) {
     }
 
     $('#grid').append(template);
+
+    //initialise confirmation plugin (for group deletion button)
+    $('[data-toggle=confirmation]').confirmation({
+        rootSelector: '[data-toggle=confirmation]'
+        
+    });
 }
 
 function generateGridGroupWithItems(grpId, items) {
@@ -236,6 +277,9 @@ function generateGridGroupWithItems(grpId, items) {
                             + '<button type="button" class="btn ml-1" data-toggle="modal" data-target="#editModal">'
                             + '<i data-feather="edit-3"></i>'
                             + '</button>'
+                            + '<button type="button" class="btn" data-toggle="confirmation" data-placement="right" data-singleton="true" data-title="Do you want to remove this group?" data-btn-ok-class="btn-danger">'
+                            + '<i data-feather="trash-2"></i>'
+                            + '</button>'
                             + '</div>'
                             + '<div class="card-body">';
 
@@ -245,7 +289,7 @@ function generateGridGroupWithItems(grpId, items) {
     template += generateGridItems(grpId, items);
     template += '</div>'
                 + '</div>';
-
+    
     return template;
 }
 
@@ -567,6 +611,23 @@ function fillDashboardWithData(msg) {
                     }
                 }
                 break;
+            case "Ana":
+                if (element.uiType == "val") {
+                    $('#' + itemId).find('.card-title').text("Current voltage");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
+                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " V");
+                    }
+                }
+                else if (element.uiType == "chart") {
+                    $('#' + itemId).find('.card-title').text("Voltage history [V]");
+                    $('#' + itemId).find('.card-subtitle').text(element.dispName);
+                    if (typeof element.DataPoints !== 'undefined') {
+                        makeChart(element.DataPoints, canvasId, colour);
+                    }
+                }
+                break;
+
 
             default:
                 break;
@@ -597,8 +658,6 @@ function makeChart(dataArray, canvasId, colour) {
         inputData.push(element.value);
     });
 
-
-
     //var inputTitle = "Humidity history";
     //var inputTimes = [1558121936, 1558121937, 1558121938, 1558121939, 1558121940];
     //var inputData = [30, 31, 33.5, 30.2, 29.4];
@@ -606,7 +665,6 @@ function makeChart(dataArray, canvasId, colour) {
     var inputLabels = [];
     
     var timeFormat =  'HH:mm:ss';
-    //console.log(inputData);
     
     //generate displayed time
     $.each(inputTimes, function (indexInArray, valueOfElement) {
@@ -670,7 +728,7 @@ const drop = (event) => {
     event.preventDefault();
     const data = event.dataTransfer.getData("text/plain");
     const element = document.querySelector(`#${data}`);
-    //try {
+    try {
         // remove the spacer content from dropzone
         event.target.removeChild(event.target.firstChild);
         // add the draggable content
@@ -707,9 +765,9 @@ const drop = (event) => {
         });
 
 
-    /*} catch (error) {
+    } catch (error) {
         console.warn("can't move the item to the same place")
-    }*/
+    }
     updateDropzones();
 }
 
