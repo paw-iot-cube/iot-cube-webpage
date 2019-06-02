@@ -136,9 +136,6 @@
                                     <label for="selectUnit"><i data-feather="percent"></i> Measurement unit</label>
                                     <select class="form-control" id="selectUnit" disabled>
                                         <option>Default</option>
-                                        <option value="celsius + percent">°C + %</option>
-                                        <option value="fahrenheit + percent">°F + %</option>
-                                        <option value="kelvin + percent">K + %</option>
                                     </select>
                                     <small class="form-text text-muted">What unit should be used to display the values? Note: Logs are still in default unit.</small>
                                 </div>
@@ -147,7 +144,7 @@
                             <!--CSV output-->
                             <p class="text-body"><i data-feather="file"></i> Request saved data:</p>
                             <button class="btn btn-primary btn-block" id="btnGenerateCSV">1. Generate CSV</button>
-                            <a class="btn btn-primary btn-block mt-1 disabled" href="data.zip" download="data.zip" id="btnDownload">2. Download</a>
+                            <a class="btn btn-primary btn-block mt-1 disabled" href="data.zip" download="data.zip" id="aDownload">2. Download</a>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-danger mr-auto" data-toggle="confirmation" 
@@ -169,61 +166,60 @@
                                 <span>&times;</span>
                             </button>
                         </div>
-                        <div class="modal-body disabledDiv">
-                            <!--Info part-->
-                            <p class="text-body">
-                                Sensor ID: <span class="text-primary" id="sensorIdDiscon"></span><br>
-                                Sensor IP: <span class="text-primary" id="sensorIpDiscon"></span><br>
-                                Sensor type: <span class="text-primary" id="sensorTypeDiscon"></span><br>
-                                Sensor status: <span class="text-danger" id="sensorConnDiscon"></span><br>
-                            </p>
-                            <hr>
-                            <!--Settings-->
-                            <form>
-                                <div class="form-group">
-                                    <label for="inputNameDiscon"><i data-feather="at-sign"></i> Displayed name</label>
-                                    <input type="text" class="form-control" id="inputNameDiscon" placeholder="Living room">
-                                    <small class="form-text text-muted">Select a display name for the Dashboard</small>
-                                </div>
-                                <div class="form-group">
-                                    <label for="visibilityChecksDiscon"><i data-feather="eye-off"></i> Should the sensor be shown on the dashboard?</label>
-                                    <div id="visibilityChecksDiscon">
-                                        <div class="form-check form-check-inline">
-                                            <input type="radio" class="form-check-input" name="radioVisibilityDiscon" value="visibilityTrue">
-                                            <label class="form-check-label" for="chkVisibilityTrue">Yes</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input type="radio" class="form-check-input" name="radioVisibilityDiscon" value="visibilityFalse">
-                                            <label class="form-check-label" for="chkVisibilityFalse">No</label>
+                        <div class="modal-body">
+                            <div class="disabledDiv">
+                                <!--Info part-->
+                                <p class="text-body">
+                                    Sensor ID: <span class="text-primary" id="sensorIdDiscon"></span><br>
+                                    Sensor IP: <span class="text-primary" id="sensorIpDiscon"></span><br>
+                                    Sensor type: <span class="text-primary" id="sensorTypeDiscon"></span><br>
+                                    Sensor status: <span class="text-danger" id="sensorConnDiscon"></span><br>
+                                </p>
+                                <hr>
+                                <!--Settings-->
+                                <form>
+                                    <div class="form-group">
+                                        <label for="inputNameDiscon"><i data-feather="at-sign"></i> Displayed name</label>
+                                        <input type="text" class="form-control" id="inputNameDiscon" placeholder="Living room">
+                                        <small class="form-text text-muted">Select a display name for the Dashboard</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="visibilityChecksDiscon"><i data-feather="eye-off"></i> Should the sensor be shown on the dashboard?</label>
+                                        <div id="visibilityChecksDiscon">
+                                            <div class="form-check form-check-inline">
+                                                <input type="radio" class="form-check-input" name="radioVisibilityDiscon" value="visibilityTrue">
+                                                <label class="form-check-label" for="chkVisibilityTrue">Yes</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input type="radio" class="form-check-input" name="radioVisibilityDiscon" value="visibilityFalse">
+                                                <label class="form-check-label" for="chkVisibilityFalse">No</label>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="inputDataPointAmountDiscon"><i data-feather="hash"></i> Amount of data displayed on charts</label>
-                                    <input type="number" class="form-control" id="inputDataPointAmountDiscon" placeholder="10" min="2">
-                                    <small class="form-text text-muted">How many data points should be used to create the graphs?</small>
-                                </div>
-                                <div class="form-group">
-                                    <label for="inputIntervalDiscon"><i data-feather="clock"></i> Measuring interval</label>
-                                    <input type="number" class="form-control" id="inputIntervalDiscon" placeholder="10" min="1">
-                                    <small class="form-text text-muted">How often (in seconds) should new measurements be performed?</small>
-                                </div>
-                                <div class="form-group">
-                                    <label for="selectUnitDiscon"><i data-feather="percent"></i> Measurement unit</label>
-                                    <select class="form-control" id="selectUnitDiscon" disabled>
-                                        <option>Default</option>
-                                        <option>°C + %</option>
-                                        <option>°F + %</option>
-                                        <option>K + %</option>
-                                    </select>
-                                    <small class="form-text text-muted">What unit should be used to display the values? Note: Logs are still in default unit.</small>
-                                </div>
-                            </form>
-                            <hr>
+                                    <div class="form-group">
+                                        <label for="inputDataPointAmountDiscon"><i data-feather="hash"></i> Amount of data displayed on charts</label>
+                                        <input type="number" class="form-control" id="inputDataPointAmountDiscon" placeholder="10" min="2">
+                                        <small class="form-text text-muted">How many data points should be used to create the graphs?</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputIntervalDiscon"><i data-feather="clock"></i> Measuring interval</label>
+                                        <input type="number" class="form-control" id="inputIntervalDiscon" placeholder="10" min="1">
+                                        <small class="form-text text-muted">How often (in seconds) should new measurements be performed?</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="selectUnitDiscon"><i data-feather="percent"></i> Measurement unit</label>
+                                        <select class="form-control" id="selectUnitDiscon" disabled>
+                                            <option>Default</option>
+                                        </select>
+                                        <small class="form-text text-muted">What unit should be used to display the values? Note: Logs are still in default unit.</small>
+                                    </div>
+                                </form>
+                                <hr>
+                            </div>
                             <!--CSV output-->
                             <p class="text-body"><i data-feather="file"></i> Request saved data:</p>
                             <button class="btn btn-primary btn-block" id="btnGenerateCSVDiscon">1. Generate CSV</button>
-                            <a class="btn btn-primary btn-block mt-1 disabled" href="data.zip" download="data.zip" id="btnDownloadDiscon">2. Download</a>
+                            <a class="btn btn-primary btn-block mt-1 disabled" href="data.zip" download="data.zip" id="aDownloadDiscon">2. Download</a>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-danger mr-auto" data-toggle="confirmation" 

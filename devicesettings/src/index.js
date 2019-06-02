@@ -146,6 +146,14 @@ $( document ).ready(function() {
             //fill items
             fillItems(newMsg);
         }
+        else if (newMsg.topic.includes("activateCsvDownload")) {
+            if (newMsg.topic == "activateCsvDownloadCon") {
+                $('#aDownload').removeClass('disabled');
+            }
+            else if (newMsg.topic == "activateCsvDownloadDiscon") {
+                $('#aDownloadDiscon').removeClass('disabled');
+            }
+        }
         
     });
 
@@ -281,6 +289,54 @@ $('input:radio[name=radioManual]').change(function() {
             }
         });
     }
+});
+
+//request CSV
+$('#btnGenerateCSV').click(function (event) { 
+    event.preventDefault();
+    var sensorId = $(event.target).parent().find('#sensorId').text();
+    var sensorType = $(event.target).parent().find('#sensorType').text();
+
+    $(this).prop('disabled', true);
+
+    var collection = {
+        'topic': 'generateCSV',
+        'sensorId': sensorId,
+        'sensorType': sensorType,
+        'modalType': 'connected'
+    };
+
+    uibuilder.send(collection);
+
+    console.log('generateCSV');
+});
+$('#btnGenerateCSVDiscon').click(function (event) { 
+    event.preventDefault();
+    var sensorId = $(event.target).parent().find('#sensorIdDiscon').text();
+    var sensorType = $(event.target).parent().find('#sensorTypeDiscon').text();
+
+    $(this).prop('disabled', true);
+
+    var collection = {
+        'topic': 'generateCSV',
+        'sensorId': sensorId,
+        'sensorType': sensorType,
+        'modalType': 'disconnected'
+    };
+
+    uibuilder.send(collection);
+
+    console.log('generateCSV');
+});
+
+//restore disabled attributes afterwards
+$('#aDownload').click(function(event) {
+    $('#btnGenerateCSV').prop('disabled', false);
+    $(this).addClass('disabled');
+});
+$('#aDownloadDiscon').click(function(event) {
+    $('#btnGenerateCSVDiscon').prop('disabled', false);
+    $(this).addClass('disabled');
 });
 
 //handle device removal when confirmed
