@@ -637,6 +637,7 @@ function fillDashboardWithData(msg) {
 }
 
 function fillEditModal(callerId) {
+    console.log(dataMsg);
     var dataElement = dataMsg.dashboardGroups.find(x => x.htmlId.toString() === callerId);
     
     $('#spanGroupNum').text(dataElement.htmlId);
@@ -751,7 +752,7 @@ const drop = (event) => {
             items.push(this.id);
             if ($(this).nextAll().length < 2) {
                 items.push($(this).parent().parent().parent().attr('id'));
-                console.log($(this).parent().parent().parent());
+                //console.log($(this).parent().parent().parent());
             }
             
         });
