@@ -248,6 +248,7 @@ $('#formActuator').on('submit', function(event) {
 
     var collection = {
         'deviceId': $('#actuatorId').text(),
+        'deviceType': $('#actuatorType').text(),
         'dispName': $('#inputActuatorName').val(),
         'manControl': manControl,
         'linkedTo': $('#selectSensorLink option:selected').val(),
@@ -344,6 +345,21 @@ $(document).on('confirmed.bs.confirmation', function(event) {
     var triggerElementId = $(event.target).attr('id');
     
     removeDevice(triggerElementId);
+});
+
+//automatically generate measurand options when selected sensor changes
+$('#selectSensorLink').on('change', function(event) {
+    var optionSelected = $('option:selected', this);
+    var valueSelected = this.value;
+    console.log(optionSelected);
+    console.log(valueSelected);
+    console.log(dataMsg.settingsInputData.find(x => x.deviceId === parseInt(valueSelected)));
+    if (valueSelected == "0") {
+        addOptionsSelectMeasurand('#selectMeasurand', '');
+    }
+    else {
+        addOptionsSelectMeasurand('#selectMeasurand', dataMsg.settingsInputData.find(x => x.deviceId === parseInt(valueSelected)).deviceType);
+    }
 });
 
 function generateSensorCardsTemplate(msg) {
@@ -651,6 +667,7 @@ function addOptionsSelectMeasurand(id, deviceType) {
             $(id).append(new Option("Light intensity", "L"));
             break;
         default:
+            $(id).append(new Option("-", ""));
             break;
     }
 }
