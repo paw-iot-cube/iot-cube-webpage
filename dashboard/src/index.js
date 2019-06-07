@@ -93,6 +93,7 @@ $( document ).ready(function() {
     // but newVal relates to the attribute being listened to.
     uibuilder.onChange('msg', function(newMsg) {
         //console.info('indexjs:msg: property msg has changed! ', newMsg);
+        console.info('msg has changed');
         //check if msg is data supply on page load or data update
         if (newMsg.topic == "onLoadData" && newMsg.payload == "lastItem") {
             //ensure, every item has data points attached
@@ -106,6 +107,7 @@ $( document ).ready(function() {
             if (typeof newMsg.dashboardGroups === 'undefined') {
                 isMissingDataPoints = true;
             }
+            console.log("missing datapoints? -> " + isMissingDataPoints.toString());
 
             if (!isMissingDataPoints) { //&& $('#grid').children().length == 0) {           
                 $('#grid').empty();     
@@ -469,14 +471,14 @@ function fillDashboardWithData(msg) {
                 break;
             case "Lum":
                 if (element.uiType == "val") {
-                    $('#' + itemId).find('.card-title').text("Current light intensity");
+                    $('#' + itemId).find('.card-title').text("Current illuminance");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
-                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " cd");
+                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " Lux");
                     }
                 }
                 else if (element.uiType == "chart") {
-                    $('#' + itemId).find('.card-title').text("Light intensity history [cd]");
+                    $('#' + itemId).find('.card-title').text("Illuminance history [Lux]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
@@ -488,11 +490,11 @@ function fillDashboardWithData(msg) {
                     $('#' + itemId).find('.card-title').text("Current distance");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
-                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " mm");
+                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " cm");
                     }
                 }
                 else if (element.uiType == "chart") {
-                    $('#' + itemId).find('.card-title').text("Distance history [mm]");
+                    $('#' + itemId).find('.card-title').text("Distance history [cm]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);
@@ -581,14 +583,14 @@ function fillDashboardWithData(msg) {
                 break;
             case "Efi":
                 if (element.uiType == "val") {
-                    $('#' + itemId).find('.card-title').text("Current E-Field");
+                    $('#' + itemId).find('.card-title').text("Currently touched");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined' && element.DataPoints.length > 0) {
-                        $('#' + itemId).find('.display-4').text(element.DataPoints[0].value.toString() + " V/m");
+                        $('#' + itemId).find('.display-4').text((element.DataPoints[0].value >>> 0).toString(2).padStart(8, '0') + " ");
                     }
                 }
                 else if (element.uiType == "chart") {
-                    $('#' + itemId).find('.card-title').text("E-Field history [V/m]");
+                    $('#' + itemId).find('.card-title').text("Touch history");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
                         makeChart(element.DataPoints, canvasId, colour);

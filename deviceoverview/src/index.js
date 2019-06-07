@@ -126,6 +126,14 @@ function fillTable(msg) {
             var trOpenTemplate = '<tr>';
         }
         
+        if (element.deviceCategory == "sensor") {
+            var tdIsVisible = '<td>' + element.isVisible.toString().replace("1", "Yes").replace("0", "No") + '</td>';
+        }
+        else if (element.deviceCategory == "actuator") {
+            var tdIsVisible = '<td>' + 'No' + '</td>';
+        }
+
+
         var tableDataTemplate = trOpenTemplate
                                 + '<th scope="row">' + (index+1) + '</th>'
                                 + '<td>' + element.deviceId + '</td>'
@@ -133,7 +141,7 @@ function fillTable(msg) {
                                 + '<td>' + element.dispName + '</td>'
                                 + '<td>' + element.deviceCategory.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }) + '</td>'
                                 + '<td>' + element.deviceType + '</td>'
-                                + '<td>' + element.isVisible.toString().replace("1", "Yes").replace("0", "No") + '</td>'
+                                + tdIsVisible
                                 + '<td>' + element.status.replace(/\b[a-z]/g, function(letter) { return letter.toUpperCase(); }) + '</td>'
                                 + '</tr>';
         
