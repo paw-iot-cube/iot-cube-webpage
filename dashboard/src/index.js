@@ -73,6 +73,11 @@ $( document ).ready(function() {
         
     });
 
+    uibuilder.sendCtrl({
+        'uibuilderCtrl': 'ready for content',
+        'test': 'test'
+    });
+
     // If Socket.IO connects/disconnects
     uibuilder.onChange('ioConnected', function(newVal){
         console.info('indexjs:ioConnected: Socket.IO Connection Status Changed: ', newVal);
@@ -92,7 +97,7 @@ $( document ).ready(function() {
     // Note that you can also listen for 'msgsReceived' as they are updated at the same time
     // but newVal relates to the attribute being listened to.
     uibuilder.onChange('msg', function(newMsg) {
-        //console.info('indexjs:msg: property msg has changed! ', newMsg);
+        console.info('indexjs:msg: property msg has changed! ', newMsg);
         console.info('msg has changed');
         //check if msg is data supply on page load or data update
         if (newMsg.topic == "onLoadData" && newMsg.payload == "lastItem") {
@@ -685,6 +690,9 @@ function makeChart(dataArray, canvasId, colour) {
             pointBackgroundColor: colour
         }]
     };
+
+    console.log(chartData);
+    console.log(canvasId);
     
     if (canvas) {
         lineChart = new Chart(canvas, {
