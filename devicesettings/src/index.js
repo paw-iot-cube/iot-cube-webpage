@@ -406,7 +406,7 @@ function generateActuatorCardsTemplate(msg) {
 
     msg.settingsInputData.forEach(function(element, index) {
         if (element.deviceCategory == "actuator") {
-            var cardOpenTemplate = '<div class="card card-custom" style="width: 18rem;" data-toggle="modal" id="card-'
+            var cardOpenTemplate = '<div class="card card-custom" style="max-width: 18rem;" data-toggle="modal" id="card-'
                                 + element.deviceId + '">';
             var overlayTemplate = '<div class="overlay overlayFade">'
                                 + '<div class="overlayText text-center">'

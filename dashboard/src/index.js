@@ -406,7 +406,7 @@ function fillDashboardWithData(msg) {
                     $('#' + itemId).find('.card-title').text("Humidity history [%]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
-                        makeChart(element.DataPoints, canvasId, colour);
+                        makeChart(element.DataPoints, canvasId, colour, msg.topic);
                     }
                 }
                 break;
@@ -422,7 +422,7 @@ function fillDashboardWithData(msg) {
                     $('#' + itemId).find('.card-title').text("Temperature history [°C]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
-                        makeChart(element.DataPoints, canvasId, colour);
+                        makeChart(element.DataPoints, canvasId, colour, msg.topic);
                     }
                 }
                 break;
@@ -438,7 +438,7 @@ function fillDashboardWithData(msg) {
                     $('#' + itemId).find('.card-title').text("Pressure history [Pa]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
-                        makeChart(element.DataPoints, canvasId, colour);
+                        makeChart(element.DataPoints, canvasId, colour, msg.topic);
                     }
                 }
                 break;
@@ -454,7 +454,7 @@ function fillDashboardWithData(msg) {
                     $('#' + itemId).find('.card-title').text("Motion history");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
-                        makeChart(element.DataPoints, canvasId, colour);
+                        makeChart(element.DataPoints, canvasId, colour, msg.topic);
                     }
                 }
                 break;
@@ -470,7 +470,7 @@ function fillDashboardWithData(msg) {
                     $('#' + itemId).find('.card-title').text("Button history");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
-                        makeChart(element.DataPoints, canvasId, colour);
+                        makeChart(element.DataPoints, canvasId, colour, msg.topic);
                     }
                 }
                 break;
@@ -486,7 +486,7 @@ function fillDashboardWithData(msg) {
                     $('#' + itemId).find('.card-title').text("Illuminance history [Lux]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
-                        makeChart(element.DataPoints, canvasId, colour);
+                        makeChart(element.DataPoints, canvasId, colour, msg.topic);
                     }
                 }
                 break;
@@ -502,7 +502,7 @@ function fillDashboardWithData(msg) {
                     $('#' + itemId).find('.card-title').text("Distance history [cm]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
-                        makeChart(element.DataPoints, canvasId, colour);
+                        makeChart(element.DataPoints, canvasId, colour, msg.topic);
                     }
                 }
                 break;
@@ -518,7 +518,7 @@ function fillDashboardWithData(msg) {
                     $('#' + itemId).find('.card-title').text("CO2 history [ppm]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
-                        makeChart(element.DataPoints, canvasId, colour);
+                        makeChart(element.DataPoints, canvasId, colour, msg.topic);
                     }
                 }
                 break;
@@ -534,7 +534,7 @@ function fillDashboardWithData(msg) {
                     $('#' + itemId).find('.card-title').text("VOC history [ppb]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
-                        makeChart(element.DataPoints, canvasId, colour);
+                        makeChart(element.DataPoints, canvasId, colour, msg.topic);
                     }
                 }
                 break;
@@ -550,7 +550,7 @@ function fillDashboardWithData(msg) {
                     $('#' + itemId).find('.card-title').text("Gyro history [°/s]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
-                        makeChart(element.DataPoints, canvasId, colour);
+                        makeChart(element.DataPoints, canvasId, colour, msg.topic);
                     }
                 }
                 break;
@@ -566,7 +566,7 @@ function fillDashboardWithData(msg) {
                     $('#' + itemId).find('.card-title').text("Acceleration history [m/s²]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
-                        makeChart(element.DataPoints, canvasId, colour);
+                        makeChart(element.DataPoints, canvasId, colour, msg.topic);
                     }
                 }
                 break;
@@ -582,7 +582,7 @@ function fillDashboardWithData(msg) {
                     $('#' + itemId).find('.card-title').text("UV history");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
-                        makeChart(element.DataPoints, canvasId, colour);
+                        makeChart(element.DataPoints, canvasId, colour, msg.topic);
                     }
                 }
                 break;
@@ -598,7 +598,7 @@ function fillDashboardWithData(msg) {
                     $('#' + itemId).find('.card-title').text("Touch history");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
-                        makeChart(element.DataPoints, canvasId, colour);
+                        makeChart(element.DataPoints, canvasId, colour, msg.topic);
                     }
                 }
                 break;
@@ -614,7 +614,7 @@ function fillDashboardWithData(msg) {
                     $('#' + itemId).find('.card-title').text("Wind speed history [m/s]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
-                        makeChart(element.DataPoints, canvasId, colour);
+                        makeChart(element.DataPoints, canvasId, colour, msg.topic);
                     }
                 }
                 break;
@@ -630,7 +630,7 @@ function fillDashboardWithData(msg) {
                     $('#' + itemId).find('.card-title').text("Voltage history [V]");
                     $('#' + itemId).find('.card-subtitle').text(element.dispName);
                     if (typeof element.DataPoints !== 'undefined') {
-                        makeChart(element.DataPoints, canvasId, colour);
+                        makeChart(element.DataPoints, canvasId, colour, msg.topic);
                     }
                 }
                 break;
@@ -654,7 +654,7 @@ function fillEditModal(callerId) {
 
 var lineChart;
 
-function makeChart(dataArray, canvasId, colour) {
+function makeChart(dataArray, canvasId, colour, msgTopic) {
     // chart
     var canvas = $('#' + canvasId);
 
@@ -666,7 +666,6 @@ function makeChart(dataArray, canvasId, colour) {
         inputData.push(element.value);
     });
 
-    //var inputTitle = "Humidity history";
     //var inputTimes = [1558121936, 1558121937, 1558121938, 1558121939, 1558121940];
     //var inputData = [30, 31, 33.5, 30.2, 29.4];
     
@@ -691,26 +690,49 @@ function makeChart(dataArray, canvasId, colour) {
         }]
     };
 
-    console.log(chartData);
-    console.log(canvasId);
+    //console.log(chartData);
+    //console.log(canvasId);
     
     if (canvas) {
-        lineChart = new Chart(canvas, {
-            type: 'line',
-            data: chartData,
-            options: {
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: false
-                        }
-                    }]
-                },
-                legend: {
-                    display: false
+        if (msgTopic == "onLoadData") {
+            lineChart = new Chart(canvas, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: false
+                            }
+                        }]
+                    },
+                    legend: {
+                        display: false
+                    }
                 }
-            }
-        });
+            });
+        }
+        else {
+            lineChart = new Chart(canvas, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: false
+                            }
+                        }]
+                    },
+                    legend: {
+                        display: false
+                    },
+                    animation: {
+                        duration: 0
+                    }
+                }
+            });
+        }
     }
 }
 
